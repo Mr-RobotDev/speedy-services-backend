@@ -4,8 +4,8 @@ import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { ActiveAccountDto } from './dto/active-account.dto';
 import { Public } from '../common/decorators/public.decorator';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/common/enums/role.enum';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
 
 @Controller({
   path: 'auth',
