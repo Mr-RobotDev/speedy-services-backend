@@ -9,7 +9,7 @@ const deleteAtPath = (obj: any, path: Path, index: number): void => {
 };
 
 const toJSON = (schema: any) => {
-  let transform;
+  let transform: any;
   if (schema.options.toJSON && schema.options.toJSON.transform) {
     transform = schema.options.toJSON.transform;
   }
