@@ -98,8 +98,7 @@ export class UserService {
       {
         page,
         limit,
-        projection:
-          '-password -verificationCode -verificationCodeSentAt -verificationCodeExpiresAt -verifiedAt',
+        projection: '-password -activatedAt',
       },
     );
   }

@@ -8,7 +8,7 @@ export class MailService {
     sendGrid.setApiKey(this.configService.get<string>('sendgrid.key'));
   }
 
-  async sendVerificationEmail(
+  async sendAccountActivationEmail(
     to: string,
     name: string,
     code: string,
@@ -22,7 +22,7 @@ export class MailService {
           code,
         },
         templateId: this.configService.get<string>(
-          'sendgrid.verifyEmailTemplate',
+          'sendgrid.activateAccountTemplate',
         ),
       };
 

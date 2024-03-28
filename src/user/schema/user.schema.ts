@@ -63,7 +63,7 @@ export class User extends Document {
   @Prop({
     type: Date,
   })
-  verifiedAt?: Date;
+  activatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

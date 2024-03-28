@@ -16,7 +16,7 @@ export default () => ({
   sendgrid: {
     key: process.env.SG_API_KEY,
     from: process.env.SG_FROM,
-    verifyEmailTemplate: process.env.SG_VERIFY_EMAIL_TEMPLATE,
+    activateAccountTemplate: process.env.SG_ACTIVATE_ACCOUNT_TEMPLATE,
     resetPasswordTemplate: process.env.SG_RESET_PASSWORD_TEMPLATE,
   },
   spaces: {

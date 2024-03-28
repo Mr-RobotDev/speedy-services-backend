@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { SignUpDto } from './dto/signup.dto';
-import { ActiveAccountDto } from './dto/active-account.dto';
+import { ActivateAccountDto } from './dto/activate-account.dto';
 import { LoginDto } from './dto/login.dto';
 import { LoginSuccess } from './types/login-success.type';
 import { User } from './types/user.type';
@@ -38,20 +38,20 @@ export class AuthService {
     };
   }
 
-  async activeAccount(
-    activeAccountDto: ActiveAccountDto,
+  async activateAccount(
+    activeAccountDto: ActivateAccountDto,
   ): Promise<{ isActive: true }> {
     const user = await this.userService.getUserByEmail(activeAccountDto.email);
     if (!user) {
       throw new NotFoundException('User not found');
     }
     if (user.isActive) {
-      throw new BadRequestException('User already verified');
+      throw new BadRequestException('This account is already active!');
     }
 
     await this.userService.updateUserById(user._id, {
       isActive: true,
-      verifiedAt: new Date(),
+      activatedAt: new Date(),
     });
 
     return {
