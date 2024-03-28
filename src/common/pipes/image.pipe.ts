@@ -2,7 +2,7 @@ import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 import {
   ALLOWED_IMAGE_TYPES,
   IMAGE_MAX_SIZE,
-} from '../constants/user.constant';
+} from '../constants/image.constant';
 
 @Injectable()
 export class ImageUploadPipe implements PipeTransform {

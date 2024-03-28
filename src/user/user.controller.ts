@@ -14,7 +14,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Account } from '../common/interfaces/account.interface';
-import { ImageUploadPipe } from './pipes/image.pipe';
+import { ImageUploadPipe } from '../common/pipes/image.pipe';
 import { MediaService } from '../media/media.service';
 import { Folder } from '../common/enums/folder.enum';
 import { Roles } from '../common/decorators/roles.decorator';
