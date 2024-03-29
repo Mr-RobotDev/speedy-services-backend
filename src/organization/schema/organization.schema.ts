@@ -26,6 +26,27 @@ export class Organization extends Document {
   address: Address;
 
   @Prop({
+    type: Number,
+    default: 0,
+    min: 0,
+  })
+  siteCount: number;
+
+  @Prop({
+    type: Number,
+    default: 0,
+    min: 0,
+  })
+  deviceCount: number;
+
+  @Prop({
+    type: Number,
+    default: 0,
+    min: 0,
+  })
+  pointsCount: number;
+
+  @Prop({
     type: String,
     trim: true,
   })

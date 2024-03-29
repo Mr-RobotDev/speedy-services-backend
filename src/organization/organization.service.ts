@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { UpdateQuery } from 'mongoose';
 import { Organization } from './schema/organization.schema';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { UpdateQuery } from 'mongoose';
+import { CountField } from '../common/enums/count-fields.enum';
 
 @Injectable()
 export class OrganizationService {
@@ -64,5 +65,17 @@ export class OrganizationService {
       throw new NotFoundException('Organization not found');
     }
     return organization;
+  }
+
+  async increaseStats(id: string, field: CountField) {
+    return this.organizationModel.findByIdAndUpdate(id, {
+      $inc: { [field]: 1 },
+    });
+  }
+
+  async decreaseStats(id: string, field: CountField) {
+    return this.organizationModel.findByIdAndUpdate(id, {
+      $inc: { [field]: -1 },
+    });
   }
 }
