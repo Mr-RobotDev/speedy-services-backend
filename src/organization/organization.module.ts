@@ -17,5 +17,6 @@ import { MediaModule } from '../media/media.module';
   ],
   controllers: [OrganizationController],
   providers: [OrganizationService],
+  exports: [OrganizationService],
 })
 export class OrganizationModule {}
