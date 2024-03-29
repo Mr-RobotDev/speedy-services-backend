@@ -12,6 +12,7 @@ import { JwtAuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { OrganizationModule } from './organization/organization.module';
+import { SiteModule } from './site/site.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { OrganizationModule } from './organization/organization.module';
     UserModule,
     AuthModule,
     OrganizationModule,
+    SiteModule,
   ],
   controllers: [AppController],
   providers: [
