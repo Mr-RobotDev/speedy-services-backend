@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Put,
   Query,
@@ -10,15 +11,16 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
+import { MediaService } from '../media/media.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Account } from '../common/interfaces/account.interface';
 import { ImageUploadPipe } from '../common/pipes/image.pipe';
-import { MediaService } from '../media/media.service';
-import { Folder } from '../common/enums/folder.enum';
-import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
   path: 'users',
@@ -71,6 +73,15 @@ export class UserController {
     @CurrentUser() account: Account,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    return this.userService.updatePassword(account, updatePasswordDto);
+    return this.userService.updatePassword(account.email, updatePasswordDto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('/:user/reset-password')
+  resetPassword(
+    @Param('user') user: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    return this.userService.resetPassword(user, resetPasswordDto);
   }
 }

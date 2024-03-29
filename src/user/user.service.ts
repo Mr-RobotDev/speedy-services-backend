@@ -9,7 +9,7 @@ import { compare } from 'bcrypt';
 import { User } from './schema/user.schema';
 import { SignUpDto } from '../auth/dto/signup.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { Account } from '../common/interfaces/account.interface';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { Role } from '../common/enums/role.enum';
 
@@ -73,10 +73,10 @@ export class UserService {
   }
 
   async updatePassword(
-    account: Account,
+    email: string,
     updatePasswordDto: UpdatePasswordDto,
   ): Promise<void> {
-    const user = await this.userModel.findOne({ email: account.email });
+    const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -87,6 +87,22 @@ export class UserService {
     }
 
     user.password = updatePasswordDto.newPassword;
+    await user.save();
+  }
+
+  async resetPassword(
+    userId: string,
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<void> {
+    const user = await this.userModel.findOne({
+      _id: userId,
+      role: Role.USER,
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.password = resetPasswordDto.newPassword;
     await user.save();
   }
 
@@ -151,34 +167,49 @@ export class UserService {
           },
           percentageChange: {
             $cond: {
-              if: { $eq: [{ $arrayElemAt: ['$lastMonthCount.count', 0] }, 0] },
-              then: {
+              if: {
+                $eq: [
+                  { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
+                  { $arrayElemAt: ['$lastMonthCount.count', 0] },
+                ],
+              },
+              then: 0,
+              else: {
                 $cond: {
                   if: {
-                    $gt: [
-                      { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
-                      0,
-                    ],
+                    $eq: [{ $arrayElemAt: ['$lastMonthCount.count', 0] }, 0],
                   },
-                  then: 100,
-                  else: 0,
-                },
-              },
-              else: {
-                $multiply: [
-                  {
-                    $divide: [
-                      {
-                        $subtract: [
+                  then: {
+                    $cond: {
+                      if: {
+                        $gt: [
                           { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
+                          0,
+                        ],
+                      },
+                      then: 100,
+                      else: 0,
+                    },
+                  },
+                  else: {
+                    $multiply: [
+                      {
+                        $divide: [
+                          {
+                            $subtract: [
+                              {
+                                $arrayElemAt: ['$totalUsersThisMonth.count', 0],
+                              },
+                              { $arrayElemAt: ['$lastMonthCount.count', 0] },
+                            ],
+                          },
                           { $arrayElemAt: ['$lastMonthCount.count', 0] },
                         ],
                       },
-                      { $arrayElemAt: ['$lastMonthCount.count', 0] },
+                      100,
                     ],
                   },
-                  100,
-                ],
+                },
               },
             },
           },
