@@ -72,11 +72,6 @@ export class RoomService {
       floorId,
     );
     const pipeline: PipelineStage[] = [
-      {
-        $match: {
-          floor: floor._id,
-        },
-      },
       ...(search
         ? [
             {
@@ -96,6 +91,11 @@ export class RoomService {
             },
           ]
         : []),
+      {
+        $match: {
+          floor: floor._id,
+        },
+      },
       {
         $project: {
           _id: 0,

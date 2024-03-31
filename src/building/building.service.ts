@@ -44,11 +44,6 @@ export class BuildingService {
   ) {
     const site = await this.findSite(user, organizationId, siteId);
     const pipeline: PipelineStage[] = [
-      {
-        $match: {
-          site: site._id,
-        },
-      },
       ...(search
         ? [
             {
@@ -68,6 +63,11 @@ export class BuildingService {
             },
           ]
         : []),
+      {
+        $match: {
+          site: site._id,
+        },
+      },
       {
         $project: {
           _id: 0,
