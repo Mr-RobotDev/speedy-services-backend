@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { OrganizationModule } from './organization/organization.module';
 import { SiteModule } from './site/site.module';
+import { FloorModule } from './floor/floor.module';
 import { BuildingModule } from './building/building.module';
 import { JwtAuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -35,6 +36,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     OrganizationModule,
     SiteModule,
     BuildingModule,
+    FloorModule,
   ],
   controllers: [AppController],
   providers: [
