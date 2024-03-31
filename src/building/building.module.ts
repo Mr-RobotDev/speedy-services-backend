@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { BuildingService } from './building.service';
 import { BuildingController } from './building.controller';
-import { MongooseModule } from '@nestjs/mongoose';
 import { Building, BuildingSchema } from './schema/building.schema';
+import { MediaModule } from '../media/media.module';
 import { SiteModule } from '../site/site.module';
-import { MediaModule } from 'src/media/media.module';
 
 @Module({
   imports: [
