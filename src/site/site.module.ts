@@ -19,5 +19,6 @@ import { OrganizationModule } from '../organization/organization.module';
   ],
   controllers: [SiteController],
   providers: [SiteService],
+  exports: [SiteService],
 })
 export class SiteModule {}

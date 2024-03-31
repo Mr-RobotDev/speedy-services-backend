@@ -61,7 +61,7 @@ export class Site extends Document {
   @Prop({
     type: String,
   })
-  banner?: string;
+  cover?: string;
 
   @Prop({
     type: Types.ObjectId,

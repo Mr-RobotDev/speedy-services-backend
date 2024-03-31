@@ -2,11 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdateQuery } from 'mongoose';
 import { Site } from './schema/site.schema';
+import { OrganizationService } from '../organization/organization.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { OrganizationService } from '../organization/organization.service';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
-import { CountField } from 'src/common/enums/count-fields.enum';
+import { CountField } from '../common/enums/count-fields.enum';
 
 @Injectable()
 export class SiteService {
@@ -32,7 +32,7 @@ export class SiteService {
     });
     await this.organizationService.increaseStats(
       organization._id,
-      CountField.SiteCount,
+      CountField.SITE_COUNT,
     );
     return site;
   }
@@ -55,10 +55,14 @@ export class SiteService {
 
   async findOne(user: string, organizationId: string, id: string) {
     const organization = await this.findOrganization(user, organizationId);
-    return this.siteModel.findOne({
+    const site = await this.siteModel.findOne({
       _id: id,
       organization: organization._id,
     });
+    if (!site) {
+      throw new NotFoundException('Site not found');
+    }
+    return site;
   }
 
   async update(
@@ -93,8 +97,20 @@ export class SiteService {
     }
     await this.organizationService.decreaseStats(
       organization._id,
-      CountField.SiteCount,
+      CountField.SITE_COUNT,
     );
     return site;
+  }
+
+  async increaseStats(id: string, field: CountField) {
+    return this.siteModel.findByIdAndUpdate(id, {
+      $inc: { [field]: 1 },
+    });
+  }
+
+  async decreaseStats(id: string, field: CountField) {
+    return this.siteModel.findByIdAndUpdate(id, {
+      $inc: { [field]: -1 },
+    });
   }
 }
