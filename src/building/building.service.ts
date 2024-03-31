@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UpdateQuery } from 'mongoose';
 import { Building } from './schema/building.schema';
 import { SiteService } from '../site/site.service';
-import { OrganizationService } from '../organization/organization.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
@@ -14,7 +13,6 @@ export class BuildingService {
   constructor(
     @InjectModel(Building.name)
     private readonly buildingModel: PaginatedModel<Building>,
-    private readonly organizationService: OrganizationService,
     private readonly siteService: SiteService,
   ) {}
 
