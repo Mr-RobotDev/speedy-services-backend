@@ -19,5 +19,6 @@ import { BuildingModule } from '../building/building.module';
   ],
   controllers: [FloorController],
   providers: [FloorService],
+  exports: [FloorService],
 })
 export class FloorModule {}

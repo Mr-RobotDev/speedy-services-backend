@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UpdateQuery } from 'mongoose';
+import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Floor } from './schema/floor.schema';
 import { BuildingService } from '../building/building.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
@@ -68,13 +68,48 @@ export class FloorService {
       siteId,
       buildingId,
     );
-    return this.floorModel.paginate(
+    const pipeline: PipelineStage[] = [
       {
-        building: building._id,
-        ...(search && { $text: { $search: search, $caseSensitive: false } }),
+        $match: {
+          building: building._id,
+        },
       },
-      paginationDto,
-    );
+      ...(search
+        ? [
+            {
+              $search: {
+                index: 'floors_partial_search',
+                autocomplete: {
+                  path: 'name',
+                  query: search,
+                  tokenOrder: 'sequential',
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 3,
+                    maxExpansions: 100,
+                  },
+                },
+              },
+            },
+          ]
+        : []),
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          name: 1,
+          description: 1,
+          roomCount: 1,
+          deviceCount: 1,
+          pointsCount: 1,
+          diagram: 1,
+          building: 1,
+          createdAt: 1,
+        },
+      },
+    ];
+
+    return this.floorModel.paginatedAggregation(pipeline, paginationDto);
   }
 
   async findOne(
