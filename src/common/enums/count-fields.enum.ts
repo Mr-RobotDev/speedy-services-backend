@@ -1,5 +1,8 @@
 export enum CountField {
-  SiteCount = 'siteCount',
-  DeviceCount = 'deviceCount',
-  PointsCount = 'pointsCount',
+  SITE_COUNT = 'siteCount',
+  BUILDING_COUNT = 'buildingCount',
+  FLOOR_COUNT = 'floorCount',
+  ROOM_COUNT = 'roomCount',
+  DEVICE_COUNT = 'deviceCount',
+  POINTS_COUNT = 'pointsCount',
 }
