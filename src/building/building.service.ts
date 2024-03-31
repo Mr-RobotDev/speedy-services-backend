@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UpdateQuery } from 'mongoose';
+import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Building } from './schema/building.schema';
 import { SiteService } from '../site/site.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
@@ -43,13 +43,49 @@ export class BuildingService {
     paginationDto?: PaginationDto,
   ) {
     const site = await this.findSite(user, organizationId, siteId);
-    return this.buildingModel.paginate(
+    const pipeline: PipelineStage[] = [
       {
-        site: site._id,
-        ...(search && { $text: { $search: search, $caseSensitive: false } }),
+        $match: {
+          site: site._id,
+        },
       },
-      paginationDto,
-    );
+      ...(search
+        ? [
+            {
+              $search: {
+                index: 'buildings_partial_search',
+                autocomplete: {
+                  path: 'name',
+                  query: search,
+                  tokenOrder: 'sequential',
+                  fuzzy: {
+                    maxEdits: 1,
+                    prefixLength: 3,
+                    maxExpansions: 100,
+                  },
+                },
+              },
+            },
+          ]
+        : []),
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          name: 1,
+          description: 1,
+          address: 1,
+          floorCount: 1,
+          deviceCount: 1,
+          pointsCount: 1,
+          cover: 1,
+          site: 1,
+          createdAt: 1,
+        },
+      },
+    ];
+
+    return this.buildingModel.paginatedAggregation(pipeline, paginationDto);
   }
 
   async findOne(
