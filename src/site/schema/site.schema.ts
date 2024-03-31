@@ -16,7 +16,6 @@ export class Site extends Document {
   @Prop({
     type: String,
     required: true,
-    text: true,
   })
   name: string;
 

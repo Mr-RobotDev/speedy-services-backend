@@ -15,7 +15,6 @@ export class Building extends Document {
   @Prop({
     type: String,
     required: true,
-    text: true,
   })
   name: string;
 
