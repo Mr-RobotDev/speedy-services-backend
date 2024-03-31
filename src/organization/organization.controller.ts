@@ -64,6 +64,7 @@ export class OrganizationController {
     @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
   ) {
     const logo = await this.mediaService.uploadImage(
+      account.sub,
       file,
       Folder.ORGANIZATION_LOGOS,
     );

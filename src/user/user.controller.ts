@@ -52,10 +52,14 @@ export class UserController {
   @Put('/profile')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
-    @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
     @CurrentUser() account: Account,
+    @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
   ) {
-    const profile = await this.mediaService.uploadImage(file, Folder.PROFILES);
+    const profile = await this.mediaService.uploadImage(
+      account.sub,
+      file,
+      Folder.PROFILES,
+    );
     await this.userService.updateUser(account.sub, { profile });
     return { profile };
   }

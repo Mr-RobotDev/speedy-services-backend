@@ -1,6 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3, PutObjectCommand, ObjectCannedACL } from '@aws-sdk/client-s3';
+import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
 
 @Injectable()
 export class MediaService {
@@ -18,21 +20,24 @@ export class MediaService {
   }
 
   async uploadImage(
+    user: string,
     file: Express.Multer.File,
     folder: string,
   ): Promise<string> {
     try {
-      const filepath = `${folder}/${file.originalname}`;
+      const extension = path.parse(file.originalname).ext;
+      const key = `${user}/${folder}/${uuidv4()}${extension}`;
+
       await this.s3.send(
         new PutObjectCommand({
           Bucket: this.configService.get('spaces.bucket'),
-          Key: filepath,
+          Key: key,
           Body: file.buffer,
           ACL: ObjectCannedACL.public_read,
           ContentType: file.mimetype,
         }),
       );
-      return `${this.configService.get('spaces.cdn')}/${filepath}`;
+      return `${this.configService.get('spaces.cdn')}/${key}`;
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('File upload failed');

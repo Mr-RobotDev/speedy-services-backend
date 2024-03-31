@@ -65,7 +65,7 @@ export class SiteController {
     return this.siteService.findOne(account.sub, organization, site);
   }
 
-  @Put(':site/banner')
+  @Put(':site/cover')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
     @CurrentUser() account: Account,
@@ -73,12 +73,13 @@ export class SiteController {
     @Param('site') site: string,
     @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
   ) {
-    const banner = await this.mediaService.uploadImage(
+    const cover = await this.mediaService.uploadImage(
+      account.sub,
       file,
-      Folder.SITE_BANNERS,
+      Folder.SITE_COVER_IMAGES,
     );
-    await this.siteService.update(account.sub, organization, site, { banner });
-    return { banner };
+    await this.siteService.update(account.sub, organization, site, { cover });
+    return { cover };
   }
 
   @Patch(':site')
