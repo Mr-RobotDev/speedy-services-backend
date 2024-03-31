@@ -6,3 +6,5 @@ export const ALLOWED_IMAGE_TYPES = [
   'image/heic',
   'image/webp',
 ];
+
+export const ALLOWED_DIAGRAM_TYPES = ['image/png', 'image/svg+xml'];
