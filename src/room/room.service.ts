@@ -194,4 +194,16 @@ export class RoomService {
     await this.floorService.decreaseStats(floor._id, CountField.ROOM_COUNT);
     return room;
   }
+
+  async increaseStats(id: string, field: CountField) {
+    return this.roomModel.findByIdAndUpdate(id, {
+      $inc: { [field]: 1 },
+    });
+  }
+
+  async decreaseStats(id: string, field: CountField) {
+    return this.roomModel.findByIdAndUpdate(id, {
+      $inc: { [field]: -1 },
+    });
+  }
 }

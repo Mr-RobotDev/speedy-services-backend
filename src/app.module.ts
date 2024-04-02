@@ -13,6 +13,7 @@ import { SiteModule } from './site/site.module';
 import { BuildingModule } from './building/building.module';
 import { FloorModule } from './floor/floor.module';
 import { RoomModule } from './room/room.module';
+import { DeviceModule } from './device/device.module';
 import { JwtAuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
@@ -39,6 +40,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     BuildingModule,
     FloorModule,
     RoomModule,
+    DeviceModule,
   ],
   controllers: [AppController],
   providers: [
