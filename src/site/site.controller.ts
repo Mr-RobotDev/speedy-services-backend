@@ -21,6 +21,7 @@ import { ImageUploadPipe } from '../common/pipes/image.pipe';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Account } from '../common/interfaces/account.interface';
 import { Folder } from '../common/enums/folder.enum';
+import { DeviceService } from '../device/device.service';
 
 @Controller({
   path: 'organizations/:organization/sites',
@@ -30,6 +31,7 @@ export class SiteController {
   constructor(
     private readonly siteService: SiteService,
     private readonly mediaService: MediaService,
+    private readonly deviceService: DeviceService,
   ) {}
 
   @Post()
@@ -63,6 +65,23 @@ export class SiteController {
     @Param('site') site: string,
   ) {
     return this.siteService.findOne(account.sub, organization, site);
+  }
+
+  @Get(':site/devices')
+  getSiteDevices(
+    @CurrentUser() account: Account,
+    @Param('organization') organization: string,
+    @Param('site') site: string,
+    @Query('search') search: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.deviceService.getSiteDevices(
+      account.sub,
+      organization,
+      site,
+      search,
+      paginationDto,
+    );
   }
 
   @Put(':site/cover')
