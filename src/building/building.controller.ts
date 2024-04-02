@@ -14,6 +14,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BuildingService } from './building.service';
 import { MediaService } from '../media/media.service';
+import { DeviceService } from '../device/device.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { UpdateBuildingDto } from './dto/update-building.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -30,6 +31,7 @@ export class BuildingController {
   constructor(
     private readonly buildingService: BuildingService,
     private readonly mediaService: MediaService,
+    private readonly deviceService: DeviceService,
   ) {}
 
   @Post()
@@ -59,6 +61,25 @@ export class BuildingController {
       account.sub,
       organization,
       site,
+      search,
+      paginationDto,
+    );
+  }
+
+  @Get(':building/devices')
+  getBuildingDevices(
+    @CurrentUser() account: Account,
+    @Param('organization') organization: string,
+    @Param('site') site: string,
+    @Param('building') building: string,
+    @Query('search') search?: string,
+    @Query() paginationDto?: PaginationDto,
+  ) {
+    return this.deviceService.getBuildingDevices(
+      account.sub,
+      organization,
+      site,
+      building,
       search,
       paginationDto,
     );
