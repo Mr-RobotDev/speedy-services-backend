@@ -29,14 +29,20 @@ export const paginate = (schema: Schema): void => {
         : 1;
     const skip = (page - 1) * limit;
 
-    const countPromise = this.countDocuments(filter).exec();
-    let docsPromise = this.find(filter)
+    let query = this.find(filter)
       .select(options.projection)
       .sort(sort)
       .skip(skip)
       .limit(limit);
 
-    docsPromise = docsPromise.exec();
+    if (options.populate) {
+      options.populate.forEach((populateOption) => {
+        query = query.populate(populateOption);
+      });
+    }
+
+    const countPromise = this.countDocuments(filter).exec();
+    const docsPromise = query.exec();
 
     return Promise.all([countPromise, docsPromise]).then((values) => {
       const [totalResults, results] = values;
