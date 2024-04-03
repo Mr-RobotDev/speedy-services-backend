@@ -23,7 +23,7 @@ import { DiagramUploadPipe } from '../common/pipes/diagram.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
-  path: 'organizations/:organization/sites/:site/buildings/:building/floors/:floor/rooms',
+  path: 'sites/:site/buildings/:building/floors/:floor/rooms',
   version: '1',
 })
 export class RoomController {
@@ -35,7 +35,6 @@ export class RoomController {
   @Post()
   create(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -43,7 +42,6 @@ export class RoomController {
   ) {
     return this.roomService.create(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -54,7 +52,6 @@ export class RoomController {
   @Get()
   findAll(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -63,7 +60,6 @@ export class RoomController {
   ) {
     return this.roomService.findAll(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -75,27 +71,19 @@ export class RoomController {
   @Get(':room')
   findOne(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Param('room') room: string,
   ) {
-    return this.roomService.findOne(
-      account.sub,
-      organization,
-      site,
-      building,
-      floor,
-      room,
-    );
+    return this.roomService.findOne(account.sub, site, building, floor, room);
   }
 
   @Put(':room/diagram')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
+
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -107,22 +95,16 @@ export class RoomController {
       file,
       Folder.ROOM_DIAGRAMS,
     );
-    await this.roomService.update(
-      account.sub,
-      organization,
-      site,
-      building,
-      floor,
-      room,
-      { diagram },
-    );
+    await this.roomService.update(account.sub, site, building, floor, room, {
+      diagram,
+    });
     return { diagram };
   }
 
   @Patch(':room')
   update(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
+
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -131,7 +113,6 @@ export class RoomController {
   ) {
     return this.roomService.update(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -143,19 +124,11 @@ export class RoomController {
   @Delete(':room')
   remove(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Param('room') room: string,
   ) {
-    return this.roomService.remove(
-      account.sub,
-      organization,
-      site,
-      building,
-      floor,
-      room,
-    );
+    return this.roomService.remove(account.sub, site, building, floor, room);
   }
 }

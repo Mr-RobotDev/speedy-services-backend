@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Site } from './schema/site.schema';
-import { OrganizationService } from '../organization/organization.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
@@ -13,37 +12,25 @@ export class SiteService {
   constructor(
     @InjectModel(Site.name)
     private readonly siteModel: PaginatedModel<Site>,
-    private readonly organizationService: OrganizationService,
   ) {}
-
-  private async findOrganization(user: string, organizationId: string) {
-    return this.organizationService.findOne(user, organizationId);
-  }
 
   async create(
     user: string,
-    organizationId: string,
+
     createSiteDto: CreateSiteDto,
   ) {
-    const organization = await this.findOrganization(user, organizationId);
     const site = await this.siteModel.create({
       ...createSiteDto,
-      organization: organization._id,
     });
-    await this.organizationService.increaseStats(
-      organization._id,
-      CountField.SITE_COUNT,
-    );
     return site;
   }
 
   async findAll(
     user: string,
-    organizationId: string,
+
     search: string,
     paginationDto: PaginationDto,
   ) {
-    const organization = await this.findOrganization(user, organizationId);
     const pipeline: PipelineStage[] = [
       ...(search
         ? [
@@ -65,11 +52,6 @@ export class SiteService {
           ]
         : []),
       {
-        $match: {
-          organization: organization._id,
-        },
-      },
-      {
         $project: {
           _id: 0,
           id: '$_id',
@@ -81,7 +63,6 @@ export class SiteService {
           deviceCount: 1,
           pointsCount: 1,
           cover: 1,
-          organization: 1,
           createdAt: 1,
         },
       },
@@ -90,11 +71,9 @@ export class SiteService {
     return this.siteModel.paginatedAggregation(pipeline, paginationDto);
   }
 
-  async findOne(user: string, organizationId: string, id: string) {
-    const organization = await this.findOrganization(user, organizationId);
+  async findOne(user: string, id: string) {
     const site = await this.siteModel.findOne({
       _id: id,
-      organization: organization._id,
     });
     if (!site) {
       throw new NotFoundException('Site not found');
@@ -104,15 +83,13 @@ export class SiteService {
 
   async update(
     user: string,
-    organizationId: string,
+
     id: string,
     updateSite: UpdateQuery<Site>,
   ) {
-    const organization = await this.findOrganization(user, organizationId);
     const site = await this.siteModel.findOneAndUpdate(
       {
         _id: id,
-        organization: organization._id,
       },
       updateSite,
       { new: true },
@@ -123,19 +100,13 @@ export class SiteService {
     return site;
   }
 
-  async remove(user: string, organizationId: string, id: string) {
-    const organization = await this.findOrganization(user, organizationId);
+  async remove(user: string, id: string) {
     const site = await this.siteModel.findOneAndDelete({
       _id: id,
-      organization: organization._id,
     });
     if (!site) {
       throw new NotFoundException('Site not found');
     }
-    await this.organizationService.decreaseStats(
-      organization._id,
-      CountField.SITE_COUNT,
-    );
     return site;
   }
 

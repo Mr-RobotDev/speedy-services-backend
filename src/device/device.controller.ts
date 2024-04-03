@@ -16,7 +16,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Account } from '../common/interfaces/account.interface';
 
 @Controller({
-  path: 'organizations/:organization/sites/:site/buildings/:building/floors/:floor/rooms/:room/devices',
+  path: 'sites/:site/buildings/:building/floors/:floor/rooms/:room/devices',
   version: '1',
 })
 export class DeviceController {
@@ -25,7 +25,6 @@ export class DeviceController {
   @Post()
   create(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -34,7 +33,6 @@ export class DeviceController {
   ) {
     return this.deviceService.create(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -46,7 +44,6 @@ export class DeviceController {
   @Get()
   findAll(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -56,7 +53,6 @@ export class DeviceController {
   ) {
     return this.deviceService.findAll(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -69,7 +65,6 @@ export class DeviceController {
   @Get(':device')
   findOne(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -78,7 +73,6 @@ export class DeviceController {
   ) {
     return this.deviceService.findOne(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -90,7 +84,6 @@ export class DeviceController {
   @Patch(':device')
   update(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -100,7 +93,6 @@ export class DeviceController {
   ) {
     return this.deviceService.update(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -113,7 +105,6 @@ export class DeviceController {
   @Delete(':device')
   remove(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -122,7 +113,6 @@ export class DeviceController {
   ) {
     return this.deviceService.remove(
       account.sub,
-      organization,
       site,
       building,
       floor,

@@ -16,17 +16,16 @@ export class BuildingService {
     private readonly siteService: SiteService,
   ) {}
 
-  private async findSite(user: string, organizationId: string, siteId: string) {
-    return this.siteService.findOne(user, organizationId, siteId);
+  private async findSite(user: string, siteId: string) {
+    return this.siteService.findOne(user, siteId);
   }
 
   async create(
     user: string,
-    organizationId: string,
     siteId: string,
     createBuildingDto: CreateBuildingDto,
   ) {
-    const site = await this.findSite(user, organizationId, siteId);
+    const site = await this.findSite(user, siteId);
     const building = await this.buildingModel.create({
       ...createBuildingDto,
       site: site._id,
@@ -37,12 +36,11 @@ export class BuildingService {
 
   async findAll(
     user: string,
-    organizationId: string,
     siteId: string,
     search?: string,
     paginationDto?: PaginationDto,
   ) {
-    const site = await this.findSite(user, organizationId, siteId);
+    const site = await this.findSite(user, siteId);
     const pipeline: PipelineStage[] = [
       ...(search
         ? [
@@ -88,13 +86,8 @@ export class BuildingService {
     return this.buildingModel.paginatedAggregation(pipeline, paginationDto);
   }
 
-  async findOne(
-    user: string,
-    organizationId: string,
-    siteId: string,
-    id: string,
-  ) {
-    const site = await this.findSite(user, organizationId, siteId);
+  async findOne(user: string, siteId: string, id: string) {
+    const site = await this.findSite(user, siteId);
     const building = await this.buildingModel.findOne({
       _id: id,
       site: site._id,
@@ -107,12 +100,11 @@ export class BuildingService {
 
   async update(
     user: string,
-    organizationId: string,
     siteId: string,
     id: string,
     updateBuilding: UpdateQuery<Building>,
   ) {
-    const site = await this.findSite(user, organizationId, siteId);
+    const site = await this.findSite(user, siteId);
     const building = await this.buildingModel.findOneAndUpdate(
       {
         _id: id,
@@ -127,13 +119,8 @@ export class BuildingService {
     return building;
   }
 
-  async remove(
-    user: string,
-    organizationId: string,
-    siteId: string,
-    id: string,
-  ) {
-    const site = await this.findSite(user, organizationId, siteId);
+  async remove(user: string, siteId: string, id: string) {
+    const site = await this.findSite(user, siteId);
     const building = await this.buildingModel.findOneAndDelete({
       _id: id,
       site: site._id,

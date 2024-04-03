@@ -8,7 +8,6 @@ import { AppService } from './app.service';
 import { MediaModule } from './media/media.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { OrganizationModule } from './organization/organization.module';
 import { SiteModule } from './site/site.module';
 import { BuildingModule } from './building/building.module';
 import { FloorModule } from './floor/floor.module';
@@ -35,7 +34,6 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     MediaModule,
     UserModule,
     AuthModule,
-    OrganizationModule,
     SiteModule,
     BuildingModule,
     FloorModule,

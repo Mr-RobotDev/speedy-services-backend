@@ -18,35 +18,21 @@ export class RoomService {
 
   private async findFloor(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
   ) {
-    return this.floorService.findOne(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-    );
+    return this.floorService.findOne(user, siteId, buildingId, floorId);
   }
 
   async create(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     createRoomDto: CreateRoomDto,
   ) {
-    const floor = await this.findFloor(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-    );
+    const floor = await this.findFloor(user, siteId, buildingId, floorId);
     const room = await this.roomModel.create({
       ...createRoomDto,
       floor: floor._id,
@@ -57,20 +43,13 @@ export class RoomService {
 
   async findAll(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     search?: string,
     paginationDto?: PaginationDto,
   ) {
-    const floor = await this.findFloor(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-    );
+    const floor = await this.findFloor(user, siteId, buildingId, floorId);
     const pipeline: PipelineStage[] = [
       ...(search
         ? [
@@ -116,19 +95,12 @@ export class RoomService {
 
   async findOne(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     id: string,
   ) {
-    const floor = await this.findFloor(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-    );
+    const floor = await this.findFloor(user, siteId, buildingId, floorId);
     const room = await this.roomModel.findOne({
       _id: id,
       floor: floor._id,
@@ -141,20 +113,13 @@ export class RoomService {
 
   async update(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     id: string,
     updateRoom: UpdateQuery<Room>,
   ) {
-    const floor = await this.findFloor(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-    );
+    const floor = await this.findFloor(user, siteId, buildingId, floorId);
     const room = await this.roomModel.findOneAndUpdate(
       {
         _id: id,
@@ -171,19 +136,12 @@ export class RoomService {
 
   async remove(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     id: string,
   ) {
-    const floor = await this.findFloor(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-    );
+    const floor = await this.findFloor(user, siteId, buildingId, floorId);
     const room = await this.roomModel.findOneAndDelete({
       _id: id,
       floor: floor._id,

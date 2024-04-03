@@ -16,33 +16,17 @@ export class FloorService {
     private readonly buildingService: BuildingService,
   ) {}
 
-  private async findBuilding(
-    user: string,
-    organizationId: string,
-    siteId: string,
-    buildingId: string,
-  ) {
-    return this.buildingService.findOne(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-    );
+  private async findBuilding(user: string, siteId: string, buildingId: string) {
+    return this.buildingService.findOne(user, siteId, buildingId);
   }
 
   async create(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     createFloorDto: CreateFloorDto,
   ) {
-    const building = await this.findBuilding(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-    );
+    const building = await this.findBuilding(user, siteId, buildingId);
     const floor = await this.floorModel.create({
       ...createFloorDto,
       building: building._id,
@@ -56,18 +40,12 @@ export class FloorService {
 
   async findAll(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     search?: string,
     paginationDto?: PaginationDto,
   ) {
-    const building = await this.findBuilding(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-    );
+    const building = await this.findBuilding(user, siteId, buildingId);
     const pipeline: PipelineStage[] = [
       ...(search
         ? [
@@ -112,19 +90,8 @@ export class FloorService {
     return this.floorModel.paginatedAggregation(pipeline, paginationDto);
   }
 
-  async findOne(
-    user: string,
-    organizationId: string,
-    siteId: string,
-    buildingId: string,
-    id: string,
-  ) {
-    const building = await this.findBuilding(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-    );
+  async findOne(user: string, siteId: string, buildingId: string, id: string) {
+    const building = await this.findBuilding(user, siteId, buildingId);
     const floor = await this.floorModel.findOne({
       _id: id,
       building: building._id,
@@ -137,18 +104,12 @@ export class FloorService {
 
   async update(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     id: string,
     updateFloor: UpdateQuery<Floor>,
   ) {
-    const building = await this.findBuilding(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-    );
+    const building = await this.findBuilding(user, siteId, buildingId);
     const floor = await this.floorModel.findOneAndUpdate(
       {
         _id: id,
@@ -163,19 +124,8 @@ export class FloorService {
     return floor;
   }
 
-  async remove(
-    user: string,
-    organizationId: string,
-    siteId: string,
-    buildingId: string,
-    id: string,
-  ) {
-    const building = await this.findBuilding(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-    );
+  async remove(user: string, siteId: string, buildingId: string, id: string) {
+    const building = await this.findBuilding(user, siteId, buildingId);
     const floor = await this.floorModel.findOneAndDelete({
       _id: id,
       building: building._id,

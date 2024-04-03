@@ -24,7 +24,7 @@ import { ImageUploadPipe } from '../common/pipes/image.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
-  path: 'organizations/:organization/sites/:site/buildings',
+  path: 'sites/:site/buildings',
   version: '1',
 })
 export class BuildingController {
@@ -37,49 +37,22 @@ export class BuildingController {
   @Post()
   create(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Body() createBuildingDto: CreateBuildingDto,
   ) {
-    return this.buildingService.create(
-      account.sub,
-      organization,
-      site,
-      createBuildingDto,
-    );
+    return this.buildingService.create(account.sub, site, createBuildingDto);
   }
 
   @Get()
   findAll(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Query('search') search?: string,
     @Query() paginationDto?: PaginationDto,
   ) {
     return this.buildingService.findAll(
       account.sub,
-      organization,
       site,
-      search,
-      paginationDto,
-    );
-  }
-
-  @Get(':building/devices')
-  getBuildingDevices(
-    @CurrentUser() account: Account,
-    @Param('organization') organization: string,
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Query('search') search?: string,
-    @Query() paginationDto?: PaginationDto,
-  ) {
-    return this.deviceService.getBuildingDevices(
-      account.sub,
-      organization,
-      site,
-      building,
       search,
       paginationDto,
     );
@@ -88,23 +61,16 @@ export class BuildingController {
   @Get(':building')
   findOne(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
   ) {
-    return this.buildingService.findOne(
-      account.sub,
-      organization,
-      site,
-      building,
-    );
+    return this.buildingService.findOne(account.sub, site, building);
   }
 
   @Put(':building/cover')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
@@ -114,27 +80,19 @@ export class BuildingController {
       file,
       Folder.BUILDING_COVER_IMAGES,
     );
-    await this.buildingService.update(
-      account.sub,
-      organization,
-      site,
-      building,
-      { cover },
-    );
+    await this.buildingService.update(account.sub, site, building, { cover });
     return { cover };
   }
 
   @Patch(':building')
   update(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Body() updateBuildingDto: UpdateBuildingDto,
   ) {
     return this.buildingService.update(
       account.sub,
-      organization,
       site,
       building,
       updateBuildingDto,
@@ -144,15 +102,9 @@ export class BuildingController {
   @Delete(':building')
   remove(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
   ) {
-    return this.buildingService.remove(
-      account.sub,
-      organization,
-      site,
-      building,
-    );
+    return this.buildingService.remove(account.sub, site, building);
   }
 }

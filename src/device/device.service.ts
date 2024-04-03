@@ -7,7 +7,6 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdateQuery } from 'mongoose';
 import { Device } from './schema/device.schema';
-import { OrganizationService } from '../organization/organization.service';
 import { SiteService } from '../site/site.service';
 import { BuildingService } from '../building/building.service';
 import { FloorService } from '../floor/floor.service';
@@ -22,7 +21,6 @@ export class DeviceService {
   constructor(
     @InjectModel(Device.name)
     private readonly deviceModel: PaginatedModel<Device>,
-    private readonly organizationService: OrganizationService,
     @Inject(forwardRef(() => SiteService))
     private readonly siteService: SiteService,
     private readonly buildingService: BuildingService,
@@ -32,25 +30,16 @@ export class DeviceService {
 
   private async findRoom(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     roomId: string,
   ) {
-    return this.roomService.findOne(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-      roomId,
-    );
+    return this.roomService.findOne(user, siteId, buildingId, floorId, roomId);
   }
 
   async create(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
@@ -59,7 +48,7 @@ export class DeviceService {
   ) {
     const room = await this.findRoom(
       user,
-      organizationId,
+
       siteId,
       buildingId,
       floorId,
@@ -72,10 +61,6 @@ export class DeviceService {
       floor: floorId,
       room: room._id,
     });
-    await this.organizationService.increaseStats(
-      organizationId,
-      CountField.DEVICE_COUNT,
-    );
     await this.siteService.increaseStats(siteId, CountField.DEVICE_COUNT);
     await this.buildingService.increaseStats(
       buildingId,
@@ -88,7 +73,6 @@ export class DeviceService {
 
   async findAll(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
@@ -96,32 +80,29 @@ export class DeviceService {
     search: string,
     paginationDto: PaginationDto,
   ) {
-    const room = await this.findRoom(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-      roomId,
-    );
+    const { page, limit } = paginationDto;
+    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
     return this.deviceModel.paginate(
       {
         room: room._id,
         ...(search && { name: { $regex: search, $options: 'i' } }),
       },
-      paginationDto,
+      {
+        page,
+        limit,
+        projection: '-site -building -floor -room',
+      },
     );
   }
 
   async getSiteDevices(
     user: string,
-    organizationId: string,
     siteId: string,
     search: string,
     paginationDto: PaginationDto,
   ) {
     const { page, limit } = paginationDto;
-    const site = await this.siteService.findOne(user, organizationId, siteId);
+    const site = await this.siteService.findOne(user, siteId);
     return this.deviceModel.paginate(
       {
         site: site._id,
@@ -152,64 +133,15 @@ export class DeviceService {
     );
   }
 
-  async getBuildingDevices(
-    user: string,
-    organizationId: string,
-    siteId: string,
-    buildingId: string,
-    search: string,
-    paginationDto: PaginationDto,
-  ) {
-    const { page, limit } = paginationDto;
-    const building = await this.buildingService.findOne(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-    );
-    return this.deviceModel.paginate(
-      {
-        building: building._id,
-        ...(search && { name: { $regex: search, $options: 'i' } }),
-      },
-      {
-        page,
-        limit,
-        populate: [
-          {
-            path: 'building',
-            select: 'name',
-          },
-          {
-            path: 'floor',
-            select: 'name',
-          },
-          {
-            path: 'room',
-            select: 'name',
-          },
-        ],
-      },
-    );
-  }
-
   async findOne(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     roomId: string,
     id: string,
   ) {
-    const room = await this.findRoom(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-      roomId,
-    );
+    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.findOne({
       _id: id,
       room: room._id,
@@ -222,7 +154,6 @@ export class DeviceService {
 
   async update(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
@@ -230,14 +161,7 @@ export class DeviceService {
     id: string,
     updateDevice: UpdateQuery<Device>,
   ) {
-    const room = await this.findRoom(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-      roomId,
-    );
+    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.findOneAndUpdate(
       {
         _id: id,
@@ -254,21 +178,13 @@ export class DeviceService {
 
   async remove(
     user: string,
-    organizationId: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     roomId: string,
     id: string,
   ) {
-    const room = await this.findRoom(
-      user,
-      organizationId,
-      siteId,
-      buildingId,
-      floorId,
-      roomId,
-    );
+    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.findOneAndDelete({
       _id: id,
       room: room._id,
@@ -276,10 +192,6 @@ export class DeviceService {
     if (!device) {
       throw new NotFoundException('Device not found');
     }
-    await this.organizationService.decreaseStats(
-      organizationId,
-      CountField.DEVICE_COUNT,
-    );
     await this.siteService.decreaseStats(siteId, CountField.DEVICE_COUNT);
     await this.buildingService.decreaseStats(
       buildingId,

@@ -23,7 +23,7 @@ import { DiagramUploadPipe } from '../common/pipes/diagram.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
-  path: 'organizations/:organization/sites/:site/buildings/:building/floors',
+  path: 'sites/:site/buildings/:building/floors',
   version: '1',
 })
 export class FloorController {
@@ -35,14 +35,12 @@ export class FloorController {
   @Post()
   create(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Body() createFloorDto: CreateFloorDto,
   ) {
     return this.floorService.create(
       account.sub,
-      organization,
       site,
       building,
       createFloorDto,
@@ -52,7 +50,6 @@ export class FloorController {
   @Get()
   findAll(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Query('search') search?: string,
@@ -60,7 +57,6 @@ export class FloorController {
   ) {
     return this.floorService.findAll(
       account.sub,
-      organization,
       site,
       building,
       search,
@@ -71,25 +67,17 @@ export class FloorController {
   @Get(':floor')
   findOne(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
   ) {
-    return this.floorService.findOne(
-      account.sub,
-      organization,
-      site,
-      building,
-      floor,
-    );
+    return this.floorService.findOne(account.sub, site, building, floor);
   }
 
   @Put(':floor/diagram')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -100,21 +88,15 @@ export class FloorController {
       file,
       Folder.FLOOR_DIAGRAMS,
     );
-    await this.floorService.update(
-      account.sub,
-      organization,
-      site,
-      building,
-      floor,
-      { diagram },
-    );
+    await this.floorService.update(account.sub, site, building, floor, {
+      diagram,
+    });
     return { diagram };
   }
 
   @Patch(':floor')
   update(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -122,7 +104,6 @@ export class FloorController {
   ) {
     return this.floorService.update(
       account.sub,
-      organization,
       site,
       building,
       floor,
@@ -133,17 +114,10 @@ export class FloorController {
   @Delete(':floor')
   remove(
     @CurrentUser() account: Account,
-    @Param('organization') organization: string,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
   ) {
-    return this.floorService.remove(
-      account.sub,
-      organization,
-      site,
-      building,
-      floor,
-    );
+    return this.floorService.remove(account.sub, site, building, floor);
   }
 }

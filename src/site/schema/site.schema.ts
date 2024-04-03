@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { Location, LocationSchema } from './location.schema';
-import { Organization } from '../../organization/schema/organization.schema';
 import { Address, AddressSchema } from '../../common/schema/address.schema';
 import toJSON from '../../common/plugins/toJSON.plugin';
 import {
@@ -61,14 +60,6 @@ export class Site extends Document {
     type: String,
   })
   cover?: string;
-
-  @Prop({
-    type: Types.ObjectId,
-    ref: Organization.name,
-    required: true,
-    index: true,
-  })
-  organization: Organization;
 }
 
 export const SiteSchema = SchemaFactory.createForClass(Site);
