@@ -21,7 +21,7 @@ export class AuthController {
   }
 
   @Roles(Role.ADMIN)
-  @Post('/activate-account')
+  @Post('activate-account')
   @HttpCode(HttpStatus.OK)
   activateAccount(@Body() activateAccountDto: ActivateAccountDto) {
     return this.authService.activateAccount(activateAccountDto);

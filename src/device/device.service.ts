@@ -29,31 +29,22 @@ export class DeviceService {
   ) {}
 
   private async findRoom(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     roomId: string,
   ) {
-    return this.roomService.findOne(user, siteId, buildingId, floorId, roomId);
+    return this.roomService.findOne(siteId, buildingId, floorId, roomId);
   }
 
   async create(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     roomId: string,
     createDeviceDto: CreateDeviceDto,
   ) {
-    const room = await this.findRoom(
-      user,
-
-      siteId,
-      buildingId,
-      floorId,
-      roomId,
-    );
+    const room = await this.findRoom(siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.create({
       ...createDeviceDto,
       site: siteId,
@@ -72,7 +63,6 @@ export class DeviceService {
   }
 
   async findAll(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
@@ -81,7 +71,7 @@ export class DeviceService {
     paginationDto: PaginationDto,
   ) {
     const { page, limit } = paginationDto;
-    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
+    const room = await this.findRoom(siteId, buildingId, floorId, roomId);
     return this.deviceModel.paginate(
       {
         room: room._id,
@@ -96,13 +86,12 @@ export class DeviceService {
   }
 
   async getSiteDevices(
-    user: string,
     siteId: string,
     search: string,
     paginationDto: PaginationDto,
   ) {
     const { page, limit } = paginationDto;
-    const site = await this.siteService.findOne(user, siteId);
+    const site = await this.siteService.findOne(siteId);
     return this.deviceModel.paginate(
       {
         site: site._id,
@@ -134,14 +123,13 @@ export class DeviceService {
   }
 
   async findOne(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     roomId: string,
     id: string,
   ) {
-    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
+    const room = await this.findRoom(siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.findOne({
       _id: id,
       room: room._id,
@@ -153,7 +141,6 @@ export class DeviceService {
   }
 
   async update(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
@@ -161,7 +148,7 @@ export class DeviceService {
     id: string,
     updateDevice: UpdateQuery<Device>,
   ) {
-    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
+    const room = await this.findRoom(siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.findOneAndUpdate(
       {
         _id: id,
@@ -177,14 +164,13 @@ export class DeviceService {
   }
 
   async remove(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     roomId: string,
     id: string,
   ) {
-    const room = await this.findRoom(user, siteId, buildingId, floorId, roomId);
+    const room = await this.findRoom(siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.findOneAndDelete({
       _id: id,
       room: room._id,

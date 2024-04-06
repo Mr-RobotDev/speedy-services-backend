@@ -19,8 +19,6 @@ import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { ImageUploadPipe } from '../common/pipes/image.pipe';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Account } from '../common/interfaces/account.interface';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
@@ -35,69 +33,53 @@ export class SiteController {
   ) {}
 
   @Post()
-  create(
-    @CurrentUser() account: Account,
-    @Body() createSiteDto: CreateSiteDto,
-  ) {
-    return this.siteService.create(account.sub, createSiteDto);
+  create(@Body() createSiteDto: CreateSiteDto) {
+    return this.siteService.create(createSiteDto);
   }
 
   @Get()
   findAll(
-    @CurrentUser() account: Account,
     @Query('search') search: string,
     @Query() paginationDto: PaginationDto,
   ) {
-    return this.siteService.findAll(account.sub, search, paginationDto);
+    return this.siteService.findAll(search, paginationDto);
   }
 
   @Get(':site')
-  findOne(@CurrentUser() account: Account, @Param('site') site: string) {
-    return this.siteService.findOne(account.sub, site);
+  findOne(@Param('site') site: string) {
+    return this.siteService.findOne(site);
   }
 
   @Get(':site/devices')
   getSiteDevices(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Query('search') search: string,
     @Query() paginationDto: PaginationDto,
   ) {
-    return this.deviceService.getSiteDevices(
-      account.sub,
-      site,
-      search,
-      paginationDto,
-    );
+    return this.deviceService.getSiteDevices(site, search, paginationDto);
   }
 
   @Put(':site/cover')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
   ) {
     const cover = await this.mediaService.uploadImage(
-      account.sub,
       file,
       Folder.SITE_COVER_IMAGES,
     );
-    await this.siteService.update(account.sub, site, { cover });
+    await this.siteService.update(site, { cover });
     return { cover };
   }
 
   @Patch(':site')
-  update(
-    @CurrentUser() account: Account,
-    @Param('site') site: string,
-    @Body() updateSiteDto: UpdateSiteDto,
-  ) {
-    return this.siteService.update(account.sub, site, updateSiteDto);
+  update(@Param('site') site: string, @Body() updateSiteDto: UpdateSiteDto) {
+    return this.siteService.update(site, updateSiteDto);
   }
 
   @Delete(':site')
-  remove(@CurrentUser() account: Account, @Param('site') site: string) {
-    return this.siteService.remove(account.sub, site);
+  remove(@Param('site') site: string) {
+    return this.siteService.remove(site);
   }
 }

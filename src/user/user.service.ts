@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -20,8 +21,30 @@ export class UserService {
     private readonly userModel: PaginatedModel<User>,
   ) {}
 
-  createUser(signupDto: SignUpDto): Promise<User> {
-    return this.userModel.create(signupDto);
+  create(signUpDto: SignUpDto): Promise<User> {
+    return this.userModel.create(signUpDto);
+  }
+
+  async createUser(signUpDto: SignUpDto): Promise<{ user: Partial<User> }> {
+    const user = await this.getUserByEmail(signUpDto.email);
+    if (user) {
+      throw new ConflictException('Email already exists');
+    }
+    const newUser = await this.userModel.create({
+      ...signUpDto,
+      isActive: true,
+      activatedAt: new Date(),
+    });
+
+    return {
+      user: {
+        id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        role: newUser.role,
+      },
+    };
   }
 
   getUserByEmail(email: string): Promise<User> {

@@ -12,8 +12,6 @@ import { DeviceService } from './device.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Account } from '../common/interfaces/account.interface';
 
 @Controller({
   path: 'sites/:site/buildings/:building/floors/:floor/rooms/:room/devices',
@@ -24,7 +22,6 @@ export class DeviceController {
 
   @Post()
   create(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -32,7 +29,6 @@ export class DeviceController {
     @Body() createDeviceDto: CreateDeviceDto,
   ) {
     return this.deviceService.create(
-      account.sub,
       site,
       building,
       floor,
@@ -43,7 +39,6 @@ export class DeviceController {
 
   @Get()
   findAll(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -52,7 +47,6 @@ export class DeviceController {
     @Query() paginationDto: PaginationDto,
   ) {
     return this.deviceService.findAll(
-      account.sub,
       site,
       building,
       floor,
@@ -64,26 +58,17 @@ export class DeviceController {
 
   @Get(':device')
   findOne(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Param('room') room: string,
     @Param('device') device: string,
   ) {
-    return this.deviceService.findOne(
-      account.sub,
-      site,
-      building,
-      floor,
-      room,
-      device,
-    );
+    return this.deviceService.findOne(site, building, floor, room, device);
   }
 
   @Patch(':device')
   update(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -92,7 +77,6 @@ export class DeviceController {
     @Body() updateDeviceDto: UpdateDeviceDto,
   ) {
     return this.deviceService.update(
-      account.sub,
       site,
       building,
       floor,
@@ -104,20 +88,12 @@ export class DeviceController {
 
   @Delete(':device')
   remove(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Param('room') room: string,
     @Param('device') device: string,
   ) {
-    return this.deviceService.remove(
-      account.sub,
-      site,
-      building,
-      floor,
-      room,
-      device,
-    );
+    return this.deviceService.remove(site, building, floor, room, device);
   }
 }

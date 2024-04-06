@@ -26,7 +26,7 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
-    const newUser = await this.userService.createUser(signUpDto);
+    const newUser = await this.userService.create(signUpDto);
     return {
       user: {
         id: newUser._id,

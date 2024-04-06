@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FloorService } from '../floor/floor.service';
+import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Room } from './schema/room.schema';
+import { FloorService } from '../floor/floor.service';
+import { MediaService } from '../media/media.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { CountField } from '../common/enums/count-fields.enum';
-import { PipelineStage, UpdateQuery } from 'mongoose';
 
 @Injectable()
 export class RoomService {
@@ -14,25 +15,20 @@ export class RoomService {
     @InjectModel(Room.name)
     private readonly roomModel: PaginatedModel<Room>,
     private readonly floorService: FloorService,
+    private readonly mediaService: MediaService,
   ) {}
 
-  private async findFloor(
-    user: string,
-    siteId: string,
-    buildingId: string,
-    floorId: string,
-  ) {
-    return this.floorService.findOne(user, siteId, buildingId, floorId);
+  private async findFloor(siteId: string, buildingId: string, floorId: string) {
+    return this.floorService.findOne(siteId, buildingId, floorId);
   }
 
   async create(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     createRoomDto: CreateRoomDto,
   ) {
-    const floor = await this.findFloor(user, siteId, buildingId, floorId);
+    const floor = await this.findFloor(siteId, buildingId, floorId);
     const room = await this.roomModel.create({
       ...createRoomDto,
       floor: floor._id,
@@ -42,14 +38,13 @@ export class RoomService {
   }
 
   async findAll(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     search?: string,
     paginationDto?: PaginationDto,
   ) {
-    const floor = await this.findFloor(user, siteId, buildingId, floorId);
+    const floor = await this.findFloor(siteId, buildingId, floorId);
     const pipeline: PipelineStage[] = [
       ...(search
         ? [
@@ -94,13 +89,12 @@ export class RoomService {
   }
 
   async findOne(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     id: string,
   ) {
-    const floor = await this.findFloor(user, siteId, buildingId, floorId);
+    const floor = await this.findFloor(siteId, buildingId, floorId);
     const room = await this.roomModel.findOne({
       _id: id,
       floor: floor._id,
@@ -112,14 +106,13 @@ export class RoomService {
   }
 
   async update(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     id: string,
     updateRoom: UpdateQuery<Room>,
   ) {
-    const floor = await this.findFloor(user, siteId, buildingId, floorId);
+    const floor = await this.findFloor(siteId, buildingId, floorId);
     const room = await this.roomModel.findOneAndUpdate(
       {
         _id: id,
@@ -135,13 +128,12 @@ export class RoomService {
   }
 
   async remove(
-    user: string,
     siteId: string,
     buildingId: string,
     floorId: string,
     id: string,
   ) {
-    const floor = await this.findFloor(user, siteId, buildingId, floorId);
+    const floor = await this.findFloor(siteId, buildingId, floorId);
     const room = await this.roomModel.findOneAndDelete({
       _id: id,
       floor: floor._id,
@@ -150,6 +142,7 @@ export class RoomService {
       throw new NotFoundException('Room not found');
     }
     await this.floorService.decreaseStats(floor._id, CountField.ROOM_COUNT);
+    await this.mediaService.deleteImage(room.diagram);
     return room;
   }
 

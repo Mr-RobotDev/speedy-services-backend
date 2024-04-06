@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Put,
   Query,
   UploadedFile,
@@ -12,6 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { MediaService } from '../media/media.service';
+import { SignUpDto } from '../auth/dto/signup.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -33,6 +35,17 @@ export class UserController {
   ) {}
 
   @Roles(Role.ADMIN)
+  @Post()
+  createUser(@Body() signUpDto: SignUpDto) {
+    return this.userService.createUser(signUpDto);
+  }
+
+  @Get('me')
+  getMe(@CurrentUser() account: Account) {
+    return this.userService.getUserById(account.sub);
+  }
+
+  @Roles(Role.ADMIN)
   @Get()
   getUsers(@Query('limit') limit?: number, @Query('page') page?: number) {
     return this.userService.getUsers(page, limit);
@@ -44,27 +57,22 @@ export class UserController {
     return this.userService.getUserStats();
   }
 
-  @Get('/me')
-  getMe(@CurrentUser() account: Account) {
-    return this.userService.getUserById(account.sub);
-  }
-
-  @Put('/profile')
+  @Put('profile')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
     @CurrentUser() account: Account,
     @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
   ) {
     const profile = await this.mediaService.uploadImage(
-      account.sub,
       file,
       Folder.PROFILES,
+      account.sub,
     );
     await this.userService.updateUser(account.sub, { profile });
     return { profile };
   }
 
-  @Patch('/update-user')
+  @Patch('update-user')
   updateUser(
     @CurrentUser() account: Account,
     @Body() updateUsernameDto: UpdateUserDto,
@@ -72,7 +80,7 @@ export class UserController {
     return this.userService.updateUser(account.sub, updateUsernameDto);
   }
 
-  @Patch('/update-password')
+  @Patch('update-password')
   updatePassword(
     @CurrentUser() account: Account,
     @Body() updatePasswordDto: UpdatePasswordDto,
@@ -81,7 +89,7 @@ export class UserController {
   }
 
   @Roles(Role.ADMIN)
-  @Patch('/:user/reset-password')
+  @Patch(':user/reset-password')
   resetPassword(
     @Param('user') user: string,
     @Body() resetPasswordDto: ResetPasswordDto,

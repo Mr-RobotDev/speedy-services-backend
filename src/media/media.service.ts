@@ -1,6 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3, PutObjectCommand, ObjectCannedACL } from '@aws-sdk/client-s3';
+import {
+  S3,
+  PutObjectCommand,
+  ObjectCannedACL,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 
@@ -20,13 +25,15 @@ export class MediaService {
   }
 
   async uploadImage(
-    user: string,
     file: Express.Multer.File,
     folder: string,
+    user?: string,
   ): Promise<string> {
     try {
       const extension = path.parse(file.originalname).ext;
-      const key = `${user}/${folder}/${uuidv4()}${extension}`;
+      const key = user
+        ? `${user}/${folder}/${uuidv4()}${extension}`
+        : `${folder}/${uuidv4()}${extension}`;
 
       await this.s3.send(
         new PutObjectCommand({
@@ -41,5 +48,24 @@ export class MediaService {
     } catch (error) {
       throw new InternalServerErrorException('File upload failed');
     }
+  }
+
+  async deleteImage(url: string): Promise<void> {
+    try {
+      const key = this.extractKeyFromUrl(url);
+      await this.s3.send(
+        new DeleteObjectCommand({
+          Bucket: this.configService.get('spaces.bucket'),
+          Key: key,
+        }),
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('File delete failed');
+    }
+  }
+
+  private extractKeyFromUrl(url: string): string {
+    const urlParts = new URL(url);
+    return urlParts.pathname.substring(1);
   }
 }

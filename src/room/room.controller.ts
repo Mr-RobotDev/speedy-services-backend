@@ -17,8 +17,6 @@ import { MediaService } from '../media/media.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Account } from '../common/interfaces/account.interface';
 import { DiagramUploadPipe } from '../common/pipes/diagram.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
@@ -34,24 +32,16 @@ export class RoomController {
 
   @Post()
   create(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Body() createRoomDto: CreateRoomDto,
   ) {
-    return this.roomService.create(
-      account.sub,
-      site,
-      building,
-      floor,
-      createRoomDto,
-    );
+    return this.roomService.create(site, building, floor, createRoomDto);
   }
 
   @Get()
   findAll(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -59,7 +49,6 @@ export class RoomController {
     @Query() paginationDto?: PaginationDto,
   ) {
     return this.roomService.findAll(
-      account.sub,
       site,
       building,
       floor,
@@ -70,20 +59,17 @@ export class RoomController {
 
   @Get(':room')
   findOne(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Param('room') room: string,
   ) {
-    return this.roomService.findOne(account.sub, site, building, floor, room);
+    return this.roomService.findOne(site, building, floor, room);
   }
 
   @Put(':room/diagram')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
-    @CurrentUser() account: Account,
-
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
@@ -91,11 +77,10 @@ export class RoomController {
     @UploadedFile(new DiagramUploadPipe()) file: Express.Multer.File,
   ) {
     const diagram = await this.mediaService.uploadImage(
-      account.sub,
       file,
       Folder.ROOM_DIAGRAMS,
     );
-    await this.roomService.update(account.sub, site, building, floor, room, {
+    await this.roomService.update(site, building, floor, room, {
       diagram,
     });
     return { diagram };
@@ -103,32 +88,22 @@ export class RoomController {
 
   @Patch(':room')
   update(
-    @CurrentUser() account: Account,
-
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Param('room') room: string,
     @Body() updateRoomDto: UpdateRoomDto,
   ) {
-    return this.roomService.update(
-      account.sub,
-      site,
-      building,
-      floor,
-      room,
-      updateRoomDto,
-    );
+    return this.roomService.update(site, building, floor, room, updateRoomDto);
   }
 
   @Delete(':room')
   remove(
-    @CurrentUser() account: Account,
     @Param('site') site: string,
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Param('room') room: string,
   ) {
-    return this.roomService.remove(account.sub, site, building, floor, room);
+    return this.roomService.remove(site, building, floor, room);
   }
 }

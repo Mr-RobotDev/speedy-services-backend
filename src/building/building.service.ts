@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Building } from './schema/building.schema';
 import { SiteService } from '../site/site.service';
+import { MediaService } from '../media/media.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
@@ -14,18 +15,15 @@ export class BuildingService {
     @InjectModel(Building.name)
     private readonly buildingModel: PaginatedModel<Building>,
     private readonly siteService: SiteService,
+    private readonly mediaService: MediaService,
   ) {}
 
-  private async findSite(user: string, siteId: string) {
-    return this.siteService.findOne(user, siteId);
+  private async findSite(siteId: string) {
+    return this.siteService.findOne(siteId);
   }
 
-  async create(
-    user: string,
-    siteId: string,
-    createBuildingDto: CreateBuildingDto,
-  ) {
-    const site = await this.findSite(user, siteId);
+  async create(siteId: string, createBuildingDto: CreateBuildingDto) {
+    const site = await this.findSite(siteId);
     const building = await this.buildingModel.create({
       ...createBuildingDto,
       site: site._id,
@@ -35,12 +33,11 @@ export class BuildingService {
   }
 
   async findAll(
-    user: string,
     siteId: string,
     search?: string,
     paginationDto?: PaginationDto,
   ) {
-    const site = await this.findSite(user, siteId);
+    const site = await this.findSite(siteId);
     const pipeline: PipelineStage[] = [
       ...(search
         ? [
@@ -86,8 +83,8 @@ export class BuildingService {
     return this.buildingModel.paginatedAggregation(pipeline, paginationDto);
   }
 
-  async findOne(user: string, siteId: string, id: string) {
-    const site = await this.findSite(user, siteId);
+  async findOne(siteId: string, id: string) {
+    const site = await this.findSite(siteId);
     const building = await this.buildingModel.findOne({
       _id: id,
       site: site._id,
@@ -99,12 +96,11 @@ export class BuildingService {
   }
 
   async update(
-    user: string,
     siteId: string,
     id: string,
     updateBuilding: UpdateQuery<Building>,
   ) {
-    const site = await this.findSite(user, siteId);
+    const site = await this.findSite(siteId);
     const building = await this.buildingModel.findOneAndUpdate(
       {
         _id: id,
@@ -119,8 +115,8 @@ export class BuildingService {
     return building;
   }
 
-  async remove(user: string, siteId: string, id: string) {
-    const site = await this.findSite(user, siteId);
+  async remove(siteId: string, id: string) {
+    const site = await this.findSite(siteId);
     const building = await this.buildingModel.findOneAndDelete({
       _id: id,
       site: site._id,
@@ -129,6 +125,7 @@ export class BuildingService {
       throw new NotFoundException('Building not found');
     }
     await this.siteService.decreaseStats(site._id, CountField.BUILDING_COUNT);
+    await this.mediaService.deleteImage(building.cover);
     return building;
   }
 

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Site } from './schema/site.schema';
+import { MediaService } from '../media/media.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
@@ -12,25 +13,17 @@ export class SiteService {
   constructor(
     @InjectModel(Site.name)
     private readonly siteModel: PaginatedModel<Site>,
+    private readonly mediaService: MediaService,
   ) {}
 
-  async create(
-    user: string,
-
-    createSiteDto: CreateSiteDto,
-  ) {
+  async create(createSiteDto: CreateSiteDto) {
     const site = await this.siteModel.create({
       ...createSiteDto,
     });
     return site;
   }
 
-  async findAll(
-    user: string,
-
-    search: string,
-    paginationDto: PaginationDto,
-  ) {
+  async findAll(search: string, paginationDto: PaginationDto) {
     const pipeline: PipelineStage[] = [
       ...(search
         ? [
@@ -71,7 +64,7 @@ export class SiteService {
     return this.siteModel.paginatedAggregation(pipeline, paginationDto);
   }
 
-  async findOne(user: string, id: string) {
+  async findOne(id: string) {
     const site = await this.siteModel.findOne({
       _id: id,
     });
@@ -81,12 +74,7 @@ export class SiteService {
     return site;
   }
 
-  async update(
-    user: string,
-
-    id: string,
-    updateSite: UpdateQuery<Site>,
-  ) {
+  async update(id: string, updateSite: UpdateQuery<Site>) {
     const site = await this.siteModel.findOneAndUpdate(
       {
         _id: id,
@@ -100,13 +88,14 @@ export class SiteService {
     return site;
   }
 
-  async remove(user: string, id: string) {
+  async remove(id: string) {
     const site = await this.siteModel.findOneAndDelete({
       _id: id,
     });
     if (!site) {
       throw new NotFoundException('Site not found');
     }
+    await this.mediaService.deleteImage(site.cover);
     return site;
   }
 
