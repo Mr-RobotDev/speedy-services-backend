@@ -16,6 +16,7 @@ import { DeviceModule } from './device/device.module';
 import { JwtAuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { WebhookModule } from './webhook/webhook.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     FloorModule,
     RoomModule,
     DeviceModule,
+    WebhookModule,
   ],
   controllers: [AppController],
   providers: [
