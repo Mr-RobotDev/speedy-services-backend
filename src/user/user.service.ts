@@ -131,9 +131,7 @@ export class UserService {
 
   async getUsers(page: number, limit: number) {
     return this.userModel.paginate(
-      {
-        role: Role.USER,
-      },
+      {},
       {
         page,
         limit,
