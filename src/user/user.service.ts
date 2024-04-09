@@ -178,59 +178,48 @@ export class UserService {
       },
       {
         $project: {
-          totalUsers: { $arrayElemAt: ['$totalUsers.count', 0] },
-          totalUsersLastMonth: { $arrayElemAt: ['$lastMonthCount.count', 0] },
+          totalUsers: {
+            $ifNull: [{ $arrayElemAt: ['$totalUsers.count', 0] }, 0],
+          },
+          totalUsersLastMonth: {
+            $ifNull: [{ $arrayElemAt: ['$lastMonthCount.count', 0] }, 0],
+          },
           totalUsersThisMonth: {
-            $arrayElemAt: ['$totalUsersThisMonth.count', 0],
+            $ifNull: [{ $arrayElemAt: ['$totalUsersThisMonth.count', 0] }, 0],
           },
           totalUsersThisYear: {
-            $arrayElemAt: ['$totalUsersThisYear.count', 0],
+            $ifNull: [{ $arrayElemAt: ['$totalUsersThisYear.count', 0] }, 0],
           },
           percentageChange: {
             $cond: {
-              if: {
-                $eq: [
-                  { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
-                  { $arrayElemAt: ['$lastMonthCount.count', 0] },
-                ],
-              },
-              then: 0,
-              else: {
+              if: { $eq: [{ $arrayElemAt: ['$lastMonthCount.count', 0] }, 0] },
+              then: {
                 $cond: {
                   if: {
-                    $eq: [{ $arrayElemAt: ['$lastMonthCount.count', 0] }, 0],
+                    $gt: [
+                      { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
+                      0,
+                    ],
                   },
-                  then: {
-                    $cond: {
-                      if: {
-                        $gt: [
-                          { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
-                          0,
-                        ],
-                      },
-                      then: 100,
-                      else: 0,
-                    },
-                  },
-                  else: {
-                    $multiply: [
+                  then: 100,
+                  else: 0,
+                },
+              },
+              else: {
+                $multiply: [
+                  {
+                    $divide: [
                       {
-                        $divide: [
-                          {
-                            $subtract: [
-                              {
-                                $arrayElemAt: ['$totalUsersThisMonth.count', 0],
-                              },
-                              { $arrayElemAt: ['$lastMonthCount.count', 0] },
-                            ],
-                          },
+                        $subtract: [
+                          { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
                           { $arrayElemAt: ['$lastMonthCount.count', 0] },
                         ],
                       },
-                      100,
+                      { $arrayElemAt: ['$lastMonthCount.count', 0] },
                     ],
                   },
-                },
+                  100,
+                ],
               },
             },
           },
