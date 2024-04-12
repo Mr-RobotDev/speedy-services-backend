@@ -1,6 +1,8 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { WebhookService } from './webhook.service';
+import { Public } from '../common/decorators/public.decorator';
 
+@Public()
 @Controller('webhook')
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
