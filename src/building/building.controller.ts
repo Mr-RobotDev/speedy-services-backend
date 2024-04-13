@@ -14,7 +14,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BuildingService } from './building.service';
 import { MediaService } from '../media/media.service';
-import { DeviceService } from '../device/device.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { UpdateBuildingDto } from './dto/update-building.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -29,7 +28,6 @@ export class BuildingController {
   constructor(
     private readonly buildingService: BuildingService,
     private readonly mediaService: MediaService,
-    private readonly deviceService: DeviceService,
   ) {}
 
   @Post()

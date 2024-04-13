@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Room } from './schema/room.schema';
@@ -8,14 +13,18 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { CountField } from '../common/enums/count-fields.enum';
+import { DeviceService } from '../device/device.service';
 
 @Injectable()
 export class RoomService {
   constructor(
     @InjectModel(Room.name)
     private readonly roomModel: PaginatedModel<Room>,
-    private readonly floorService: FloorService,
     private readonly mediaService: MediaService,
+    @Inject(forwardRef(() => FloorService))
+    private readonly floorService: FloorService,
+    @Inject(forwardRef(() => DeviceService))
+    private readonly deviceService: DeviceService,
   ) {}
 
   private async findFloor(siteId: string, buildingId: string, floorId: string) {
@@ -143,7 +152,25 @@ export class RoomService {
     }
     await this.floorService.decreaseStats(floor._id, CountField.ROOM_COUNT);
     await this.mediaService.deleteImage(room.diagram);
+    await this.deviceService.removeRoomDevices(room._id);
     return room;
+  }
+
+  async removeFloorRooms(floorId: string) {
+    const rooms = await this.roomModel.find({
+      floor: floorId,
+    });
+    await this.roomModel.deleteMany({
+      floor: floorId,
+    });
+    await Promise.all(
+      rooms.map((room) => this.deviceService.removeRoomDevices(room._id)),
+    );
+    await Promise.all(
+      rooms
+        .filter((room) => room.diagram)
+        .map((room) => this.mediaService.deleteImage(room.diagram)),
+    );
   }
 
   async increaseStats(id: string, field: CountField) {

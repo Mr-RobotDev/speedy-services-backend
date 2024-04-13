@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Building } from './schema/building.schema';
-import { SiteService } from '../site/site.service';
 import { MediaService } from '../media/media.service';
+import { SiteService } from '../site/site.service';
+import { FloorService } from '../floor/floor.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
@@ -14,8 +20,11 @@ export class BuildingService {
   constructor(
     @InjectModel(Building.name)
     private readonly buildingModel: PaginatedModel<Building>,
-    private readonly siteService: SiteService,
     private readonly mediaService: MediaService,
+    @Inject(forwardRef(() => SiteService))
+    private readonly siteService: SiteService,
+    @Inject(forwardRef(() => FloorService))
+    private readonly floorService: FloorService,
   ) {}
 
   private async findSite(siteId: string) {
@@ -126,7 +135,27 @@ export class BuildingService {
     }
     await this.siteService.decreaseStats(site._id, CountField.BUILDING_COUNT);
     await this.mediaService.deleteImage(building.cover);
+    await this.floorService.removeBuildingFloors(site._id, building._id);
     return building;
+  }
+
+  async removeSiteBuildings(siteId: string) {
+    const buildings = await this.buildingModel.find({
+      site: siteId,
+    });
+    await this.buildingModel.deleteMany({
+      site: siteId,
+    });
+    await Promise.all(
+      buildings.map((building) =>
+        this.floorService.removeBuildingFloors(siteId, building._id),
+      ),
+    );
+    await Promise.all(
+      buildings
+        .filter((building) => building.cover)
+        .map((building) => this.mediaService.deleteImage(building.cover)),
+    );
   }
 
   async increaseStats(id: string, field: CountField) {

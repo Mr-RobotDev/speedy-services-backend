@@ -1,8 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Site } from './schema/site.schema';
 import { MediaService } from '../media/media.service';
+import { BuildingService } from '../building/building.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
@@ -14,6 +20,8 @@ export class SiteService {
     @InjectModel(Site.name)
     private readonly siteModel: PaginatedModel<Site>,
     private readonly mediaService: MediaService,
+    @Inject(forwardRef(() => BuildingService))
+    private readonly buildingService: BuildingService,
   ) {}
 
   async create(createSiteDto: CreateSiteDto) {
@@ -65,9 +73,7 @@ export class SiteService {
   }
 
   async findOne(id: string) {
-    const site = await this.siteModel.findOne({
-      _id: id,
-    });
+    const site = await this.siteModel.findById(id);
     if (!site) {
       throw new NotFoundException('Site not found');
     }
@@ -75,13 +81,9 @@ export class SiteService {
   }
 
   async update(id: string, updateSite: UpdateQuery<Site>) {
-    const site = await this.siteModel.findOneAndUpdate(
-      {
-        _id: id,
-      },
-      updateSite,
-      { new: true },
-    );
+    const site = await this.siteModel.findByIdAndUpdate(id, updateSite, {
+      new: true,
+    });
     if (!site) {
       throw new NotFoundException('Site not found');
     }
@@ -89,13 +91,14 @@ export class SiteService {
   }
 
   async remove(id: string) {
-    const site = await this.siteModel.findOneAndDelete({
-      _id: id,
-    });
+    console.log(id);
+    const site = await this.siteModel.findByIdAndDelete(id);
+    console.log(site);
     if (!site) {
       throw new NotFoundException('Site not found');
     }
-    await this.mediaService.deleteImage(site.cover);
+    await this.buildingService.removeSiteBuildings(site._id);
+    if (site.cover) await this.mediaService.deleteImage(site.cover);
     return site;
   }
 

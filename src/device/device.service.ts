@@ -23,8 +23,11 @@ export class DeviceService {
     private readonly deviceModel: PaginatedModel<Device>,
     @Inject(forwardRef(() => SiteService))
     private readonly siteService: SiteService,
+    @Inject(forwardRef(() => BuildingService))
     private readonly buildingService: BuildingService,
+    @Inject(forwardRef(() => FloorService))
     private readonly floorService: FloorService,
+    @Inject(forwardRef(() => RoomService))
     private readonly roomService: RoomService,
   ) {}
 
@@ -186,5 +189,9 @@ export class DeviceService {
     await this.floorService.decreaseStats(floorId, CountField.DEVICE_COUNT);
     await this.roomService.decreaseStats(room._id, CountField.DEVICE_COUNT);
     return device;
+  }
+
+  async removeRoomDevices(roomId: string) {
+    await this.deviceModel.deleteMany({ room: roomId });
   }
 }

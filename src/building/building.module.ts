@@ -5,7 +5,7 @@ import { BuildingController } from './building.controller';
 import { Building, BuildingSchema } from './schema/building.schema';
 import { MediaModule } from '../media/media.module';
 import { SiteModule } from '../site/site.module';
-import { DeviceModule } from '../device/device.module';
+import { FloorModule } from '../floor/floor.module';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { DeviceModule } from '../device/device.module';
     ]),
     MediaModule,
     forwardRef(() => SiteModule),
-    forwardRef(() => DeviceModule),
+    forwardRef(() => FloorModule),
   ],
   controllers: [BuildingController],
   providers: [BuildingService],

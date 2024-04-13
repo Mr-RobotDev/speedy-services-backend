@@ -4,6 +4,7 @@ import { SiteService } from './site.service';
 import { SiteController } from './site.controller';
 import { Site, SiteSchema } from './schema/site.schema';
 import { MediaModule } from '../media/media.module';
+import { BuildingModule } from '../building/building.module';
 import { DeviceModule } from '../device/device.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { DeviceModule } from '../device/device.module';
       },
     ]),
     MediaModule,
+    forwardRef(() => BuildingModule),
     forwardRef(() => DeviceModule),
   ],
   controllers: [SiteController],

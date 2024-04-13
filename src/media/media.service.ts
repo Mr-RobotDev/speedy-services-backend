@@ -60,7 +60,7 @@ export class MediaService {
         }),
       );
     } catch (error) {
-      throw new InternalServerErrorException('File delete failed');
+      console.error(error);
     }
   }
 

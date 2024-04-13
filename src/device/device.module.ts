@@ -12,9 +12,9 @@ import { RoomModule } from '../room/room.module';
   imports: [
     MongooseModule.forFeature([{ name: Device.name, schema: DeviceSchema }]),
     forwardRef(() => SiteModule),
-    BuildingModule,
-    FloorModule,
-    RoomModule,
+    forwardRef(() => BuildingModule),
+    forwardRef(() => FloorModule),
+    forwardRef(() => RoomModule),
   ],
   controllers: [DeviceController],
   providers: [DeviceService],

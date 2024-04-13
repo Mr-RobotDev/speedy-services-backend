@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { FloorService } from './floor.service';
 import { FloorController } from './floor.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Floor, FloorSchema } from './schema/floor.schema';
 import { MediaModule } from '../media/media.module';
 import { BuildingModule } from '../building/building.module';
+import { RoomModule } from '../room/room.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { BuildingModule } from '../building/building.module';
       },
     ]),
     MediaModule,
-    BuildingModule,
+    forwardRef(() => BuildingModule),
+    forwardRef(() => RoomModule),
   ],
   controllers: [FloorController],
   providers: [FloorService],

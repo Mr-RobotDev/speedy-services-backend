@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { PipelineStage, UpdateQuery } from 'mongoose';
 import { Floor } from './schema/floor.schema';
-import { BuildingService } from '../building/building.service';
 import { MediaService } from '../media/media.service';
+import { BuildingService } from '../building/building.service';
+import { RoomService } from '../room/room.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
@@ -14,8 +20,11 @@ export class FloorService {
   constructor(
     @InjectModel(Floor.name)
     private readonly floorModel: PaginatedModel<Floor>,
-    private readonly buildingService: BuildingService,
     private readonly mediaService: MediaService,
+    @Inject(forwardRef(() => BuildingService))
+    private readonly buildingService: BuildingService,
+    @Inject(forwardRef(() => RoomService))
+    private readonly roomService: RoomService,
   ) {}
 
   private async findBuilding(siteId: string, buildingId: string) {
@@ -137,7 +146,25 @@ export class FloorService {
       CountField.FLOOR_COUNT,
     );
     await this.mediaService.deleteImage(floor.diagram);
+    await this.roomService.removeFloorRooms(floor._id);
     return floor;
+  }
+
+  async removeBuildingFloors(siteId: string, buildingId: string) {
+    const floors = await this.floorModel.find({
+      building: buildingId,
+    });
+    await this.floorModel.deleteMany({
+      building: buildingId,
+    });
+    await Promise.all(
+      floors.map((floor) => this.roomService.removeFloorRooms(floor._id)),
+    );
+    await Promise.all(
+      floors
+        .filter((floor) => floor.diagram)
+        .map((floor) => this.mediaService.deleteImage(floor.diagram)),
+    );
   }
 
   async increaseStats(id: string, field: CountField) {
