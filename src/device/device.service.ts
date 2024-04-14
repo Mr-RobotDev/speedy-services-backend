@@ -83,7 +83,24 @@ export class DeviceService {
       {
         page,
         limit,
-        projection: '-site -building -floor -room',
+        populate: [
+          {
+            path: 'site',
+            select: 'name',
+          },
+          {
+            path: 'building',
+            select: 'name',
+          },
+          {
+            path: 'floor',
+            select: 'name',
+          },
+          {
+            path: 'room',
+            select: 'name',
+          },
+        ],
       },
     );
   }
