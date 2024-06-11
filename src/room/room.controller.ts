@@ -16,7 +16,7 @@ import { RoomService } from './room.service';
 import { MediaService } from '../media/media.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { DiagramUploadPipe } from '../common/pipes/diagram.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
@@ -46,7 +46,7 @@ export class RoomController {
     @Param('building') building: string,
     @Param('floor') floor: string,
     @Query('search') search?: string,
-    @Query() paginationDto?: PaginationDto,
+    @Query() paginationDto?: PaginationQueryDto,
   ) {
     return this.roomService.findAll(
       site,

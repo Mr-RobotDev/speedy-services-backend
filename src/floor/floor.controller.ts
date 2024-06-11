@@ -16,7 +16,7 @@ import { FloorService } from './floor.service';
 import { MediaService } from '../media/media.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { DiagramUploadPipe } from '../common/pipes/diagram.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
@@ -44,7 +44,7 @@ export class FloorController {
     @Param('site') site: string,
     @Param('building') building: string,
     @Query('search') search?: string,
-    @Query() paginationDto?: PaginationDto,
+    @Query() paginationDto?: PaginationQueryDto,
   ) {
     return this.floorService.findAll(site, building, search, paginationDto);
   }

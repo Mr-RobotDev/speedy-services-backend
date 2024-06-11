@@ -16,7 +16,7 @@ import { BuildingService } from './building.service';
 import { MediaService } from '../media/media.service';
 import { CreateBuildingDto } from './dto/create-building.dto';
 import { UpdateBuildingDto } from './dto/update-building.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { ImageUploadPipe } from '../common/pipes/image.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
@@ -42,7 +42,7 @@ export class BuildingController {
   findAll(
     @Param('site') site: string,
     @Query('search') search?: string,
-    @Query() paginationDto?: PaginationDto,
+    @Query() paginationDto?: PaginationQueryDto,
   ) {
     return this.buildingService.findAll(site, search, paginationDto);
   }

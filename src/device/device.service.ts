@@ -12,7 +12,7 @@ import { BuildingService } from '../building/building.service';
 import { FloorService } from '../floor/floor.service';
 import { RoomService } from '../room/room.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { CountField } from '../common/enums/count-fields.enum';
 
@@ -71,7 +71,7 @@ export class DeviceService {
     floorId: string,
     roomId: string,
     search: string,
-    paginationDto: PaginationDto,
+    paginationDto: PaginationQueryDto,
   ) {
     const { page, limit } = paginationDto;
     const room = await this.findRoom(siteId, buildingId, floorId, roomId);
@@ -108,7 +108,7 @@ export class DeviceService {
   async getSiteDevices(
     siteId: string,
     search: string,
-    paginationDto: PaginationDto,
+    paginationDto: PaginationQueryDto,
   ) {
     const { page, limit } = paginationDto;
     const site = await this.siteService.findOne(siteId);

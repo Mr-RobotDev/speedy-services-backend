@@ -10,7 +10,7 @@ import { Site } from './schema/site.schema';
 import { MediaService } from '../media/media.service';
 import { BuildingService } from '../building/building.service';
 import { CreateSiteDto } from './dto/create-site.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { CountField } from '../common/enums/count-fields.enum';
 
@@ -31,7 +31,7 @@ export class SiteService {
     return site;
   }
 
-  async findAll(search: string, paginationDto: PaginationDto) {
+  async findAll(search: string, paginationDto: PaginationQueryDto) {
     const pipeline: PipelineStage[] = [
       ...(search
         ? [

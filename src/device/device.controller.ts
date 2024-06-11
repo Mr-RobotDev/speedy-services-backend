@@ -11,7 +11,7 @@ import {
 import { DeviceService } from './device.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 
 @Controller({
   path: 'sites/:site/buildings/:building/floors/:floor/rooms/:room/devices',
@@ -44,7 +44,7 @@ export class DeviceController {
     @Param('floor') floor: string,
     @Param('room') room: string,
     @Query('search') search: string,
-    @Query() paginationDto: PaginationDto,
+    @Query() paginationDto: PaginationQueryDto,
   ) {
     return this.deviceService.findAll(
       site,

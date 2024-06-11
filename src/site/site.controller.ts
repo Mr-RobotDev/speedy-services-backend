@@ -17,7 +17,7 @@ import { MediaService } from '../media/media.service';
 import { DeviceService } from '../device/device.service';
 import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { ImageUploadPipe } from '../common/pipes/image.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
@@ -40,7 +40,7 @@ export class SiteController {
   @Get()
   findAll(
     @Query('search') search: string,
-    @Query() paginationDto: PaginationDto,
+    @Query() paginationDto: PaginationQueryDto,
   ) {
     return this.siteService.findAll(search, paginationDto);
   }
@@ -54,7 +54,7 @@ export class SiteController {
   getSiteDevices(
     @Param('site') site: string,
     @Query('search') search: string,
-    @Query() paginationDto: PaginationDto,
+    @Query() paginationDto: PaginationQueryDto,
   ) {
     return this.deviceService.getSiteDevices(site, search, paginationDto);
   }

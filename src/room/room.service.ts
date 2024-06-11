@@ -10,7 +10,7 @@ import { Room } from './schema/room.schema';
 import { FloorService } from '../floor/floor.service';
 import { MediaService } from '../media/media.service';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { CountField } from '../common/enums/count-fields.enum';
 import { DeviceService } from '../device/device.service';
@@ -51,7 +51,7 @@ export class RoomService {
     buildingId: string,
     floorId: string,
     search?: string,
-    paginationDto?: PaginationDto,
+    paginationDto?: PaginationQueryDto,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
     const pipeline: PipelineStage[] = [

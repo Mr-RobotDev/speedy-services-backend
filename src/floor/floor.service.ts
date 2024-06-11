@@ -11,7 +11,7 @@ import { MediaService } from '../media/media.service';
 import { BuildingService } from '../building/building.service';
 import { RoomService } from '../room/room.service';
 import { CreateFloorDto } from './dto/create-floor.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { CountField } from '../common/enums/count-fields.enum';
 
@@ -52,7 +52,7 @@ export class FloorService {
     siteId: string,
     buildingId: string,
     search?: string,
-    paginationDto?: PaginationDto,
+    paginationDto?: PaginationQueryDto,
   ) {
     const building = await this.findBuilding(siteId, buildingId);
     const pipeline: PipelineStage[] = [
