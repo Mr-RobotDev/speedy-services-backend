@@ -1,36 +1,74 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { DeviceService } from '../device/device.service';
+import { EventService } from '../event/event.service';
 
 @Injectable()
-export class WebhookService {
-  async door(doorWebhookDto: any) {
-    console.log('doorWebhookDto', doorWebhookDto);
+export class WebhookService implements OnModuleInit {
+  private resolvedUrl: string;
+  private token: string;
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+    private readonly deviceService: DeviceService,
+    private readonly eventService: EventService,
+  ) {
+    this.token = btoa(
+      `${configService.get<string>('miniserver.username')}:${configService.get<string>('miniserver.password')}`,
+    );
   }
 
-  async alarm(alarmWebhookDto: any) {
-    console.log('alarmWebhookDto', alarmWebhookDto);
+  async onModuleInit() {
+    await this.refreshResolvedUrl();
   }
 
-  async lux(luxWebhookDto: any) {
-    console.log('luxWebhookDto', luxWebhookDto);
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async refreshResolvedUrl() {
+    try {
+      const response = await this.httpService.axiosRef.get(
+        `/${this.configService.get<string>('miniserver.id')}`,
+      );
+      this.resolvedUrl = response.request?.res?.responseUrl;
+    } catch (error) {
+      console.error('Error fetching URL:', error);
+    }
   }
 
-  async motion(motionWebhookDto: any) {
-    console.log('motionWebhookDto', motionWebhookDto);
+  @Cron('*/15 * * * * *')
+  async fetchData() {
+    try {
+      const uuids = await this.deviceService.getAllDevices();
+      const fetchAndProcessPromises = uuids.map(async (uuid) => {
+        const value = await this.fetchDeviceData(uuid);
+        const device = await this.deviceService.updateDeviceValue(uuid, value);
+        await this.eventService.create({
+          value,
+          device: device.id,
+        });
+      });
+
+      await Promise.all(fetchAndProcessPromises);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   }
 
-  async co2(co2WebhookDto: any) {
-    console.log('co2WebhookDto', co2WebhookDto);
-  }
-
-  async temperature(temperatureWebhookDto: any) {
-    console.log('temperatureWebhookDto', temperatureWebhookDto);
-  }
-
-  async airConditioner(airConditionerWebhookDto: any) {
-    console.log('airConditionerWebhookDto', airConditionerWebhookDto);
-  }
-
-  async energy(energyWebhookDto: any) {
-    console.log('energyWebhookDto', energyWebhookDto);
+  private async fetchDeviceData(uuid: string): Promise<string> {
+    try {
+      const response = await this.httpService.axiosRef.get(
+        `${this.resolvedUrl}jdev/sps/io/${uuid}/state`,
+        {
+          headers: {
+            Authorization: 'Basic ' + this.token,
+          },
+        },
+      );
+      return response.data.LL.value;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   }
 }
