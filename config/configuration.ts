@@ -27,4 +27,10 @@ export default () => ({
     accessKey: process.env.SPACES_ACCESS_KEY,
     secretKey: process.env.SPACES_SECRET_KEY,
   },
+  miniserver: {
+    url: process.env.MINISERVER_URL,
+    id: process.env.MINISERVER_ID,
+    username: process.env.MINISERVER_USERNAME,
+    password: process.env.MINISERVER_PASSWORD,
+  },
 });
