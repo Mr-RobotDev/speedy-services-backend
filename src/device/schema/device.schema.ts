@@ -21,12 +21,31 @@ export class Device extends Document {
   name: string;
 
   @Prop({
+    type: String,
+    required: true,
+    index: true,
+  })
+  uuid: string;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  type: string;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  value: string;
+
+  @Prop({
     type: Types.ObjectId,
     ref: Site.name,
     required: true,
     index: true,
   })
-  site: Site | Types.ObjectId | string;
+  site: Site;
 
   @Prop({
     type: Types.ObjectId,
@@ -34,7 +53,7 @@ export class Device extends Document {
     required: true,
     index: true,
   })
-  building: Building | Types.ObjectId | string;
+  building: Building;
 
   @Prop({
     type: Types.ObjectId,
@@ -42,7 +61,7 @@ export class Device extends Document {
     required: true,
     index: true,
   })
-  floor: Floor | Types.ObjectId | string;
+  floor: Floor;
 
   @Prop({
     type: Types.ObjectId,
@@ -58,19 +77,3 @@ export const DeviceSchema = SchemaFactory.createForClass(Device);
 DeviceSchema.plugin(toJSON);
 DeviceSchema.plugin(paginate);
 DeviceSchema.plugin(paginatedAggregation);
-
-DeviceSchema.pre('save', function (next) {
-  if (typeof this.site === 'string') {
-    this.site = new Types.ObjectId(this.site);
-  }
-
-  if (typeof this.building === 'string') {
-    this.building = new Types.ObjectId(this.building);
-  }
-
-  if (typeof this.floor === 'string') {
-    this.floor = new Types.ObjectId(this.floor);
-  }
-
-  next();
-});

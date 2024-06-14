@@ -31,6 +31,19 @@ export class DeviceService {
     private readonly roomService: RoomService,
   ) {}
 
+  async getAllDevices() {
+    const devices = await this.deviceModel.find({}, 'uuid');
+    return devices.map((device) => device.uuid);
+  }
+
+  async updateDeviceValue(uuid: string, value: string): Promise<Device> {
+    return this.deviceModel.findOneAndUpdate(
+      { uuid },
+      { value },
+      { new: true },
+    );
+  }
+
   private async findRoom(
     siteId: string,
     buildingId: string,

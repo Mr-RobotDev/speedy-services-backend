@@ -1,6 +1,7 @@
 import { APP_GUARD } from '@nestjs/core';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from '../config/configuration';
 import { AppController } from './app.controller';
@@ -17,13 +18,13 @@ import { JwtAuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { WebhookModule } from './webhook/webhook.module';
-import { PointModule } from './point/point.module';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('database.url'),
       }),
       inject: [ConfigService],
@@ -33,6 +34,7 @@ import { PointModule } from './point/point.module';
       isGlobal: true,
       ignoreEnvFile: false,
     }),
+    ScheduleModule.forRoot(),
     MediaModule,
     UserModule,
     AuthModule,
@@ -42,7 +44,7 @@ import { PointModule } from './point/point.module';
     RoomModule,
     DeviceModule,
     WebhookModule,
-    PointModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [
