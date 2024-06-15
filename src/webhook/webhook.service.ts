@@ -44,7 +44,7 @@ export class WebhookService implements OnModuleInit {
       const fetchAndProcessPromises = uuids.map(async (uuid) => {
         const value = await this.fetchDeviceData(uuid);
         const device = await this.deviceService.updateDeviceValue(uuid, value);
-        await this.eventService.create({
+        await this.eventService.createEvent({
           value,
           device: device.id,
         });

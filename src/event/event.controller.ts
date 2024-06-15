@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { EventService } from './event.service';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { GetEventsQueryDto } from './dto/get-events.dto';
 
 @Controller({
   path: 'devices/:device/events',
@@ -12,7 +12,7 @@ export class EventController {
   @Get()
   getEvents(
     @Param('device') device: string,
-    @Query() query: PaginationQueryDto,
+    @Query() query: GetEventsQueryDto,
   ) {
     return this.eventService.getEvents(device, query);
   }
