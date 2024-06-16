@@ -18,6 +18,7 @@ import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { DiagramUploadPipe } from '../common/pipes/diagram.pipe';
+import { IsObjectIdPipe } from '../common/pipes/objectid.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
@@ -32,9 +33,9 @@ export class RoomController {
 
   @Post()
   create(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
     @Body() createRoomDto: CreateRoomDto,
   ) {
     return this.roomService.create(site, building, floor, createRoomDto);
@@ -42,9 +43,9 @@ export class RoomController {
 
   @Get()
   findAll(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
     @Query('search') search?: string,
     @Query() paginationDto?: PaginationQueryDto,
   ) {
@@ -59,10 +60,10 @@ export class RoomController {
 
   @Get(':room')
   findOne(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
   ) {
     return this.roomService.findOne(site, building, floor, room);
   }
@@ -70,10 +71,10 @@ export class RoomController {
   @Put(':room/diagram')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
     @UploadedFile(new DiagramUploadPipe()) file: Express.Multer.File,
   ) {
     const diagram = await this.mediaService.uploadImage(
@@ -88,10 +89,10 @@ export class RoomController {
 
   @Patch(':room')
   update(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
     @Body() updateRoomDto: UpdateRoomDto,
   ) {
     return this.roomService.update(site, building, floor, room, updateRoomDto);
@@ -99,10 +100,10 @@ export class RoomController {
 
   @Delete(':room')
   remove(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
   ) {
     return this.roomService.remove(site, building, floor, room);
   }

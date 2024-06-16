@@ -86,7 +86,6 @@ export class RoomService {
           name: 1,
           description: 1,
           deviceCount: 1,
-          pointsCount: 1,
           diagram: 1,
           floor: 1,
           createdAt: 1,

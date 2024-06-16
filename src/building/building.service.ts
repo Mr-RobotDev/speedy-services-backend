@@ -81,7 +81,6 @@ export class BuildingService {
           address: 1,
           floorCount: 1,
           deviceCount: 1,
-          pointsCount: 1,
           cover: 1,
           site: 1,
           createdAt: 1,

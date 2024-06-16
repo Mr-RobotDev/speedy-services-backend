@@ -37,13 +37,6 @@ export class Floor extends Document {
   deviceCount: number;
 
   @Prop({
-    type: Number,
-    default: 0,
-    min: 0,
-  })
-  pointsCount: number;
-
-  @Prop({
     type: String,
   })
   diagram?: string;

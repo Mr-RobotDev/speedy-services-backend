@@ -18,6 +18,7 @@ import { CreateFloorDto } from './dto/create-floor.dto';
 import { UpdateFloorDto } from './dto/update-floor.dto';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { DiagramUploadPipe } from '../common/pipes/diagram.pipe';
+import { IsObjectIdPipe } from '../common/pipes/objectid.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
@@ -32,8 +33,8 @@ export class FloorController {
 
   @Post()
   create(
-    @Param('site') site: string,
-    @Param('building') building: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
     @Body() createFloorDto: CreateFloorDto,
   ) {
     return this.floorService.create(site, building, createFloorDto);
@@ -41,8 +42,8 @@ export class FloorController {
 
   @Get()
   findAll(
-    @Param('site') site: string,
-    @Param('building') building: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
     @Query('search') search?: string,
     @Query() paginationDto?: PaginationQueryDto,
   ) {
@@ -51,9 +52,9 @@ export class FloorController {
 
   @Get(':floor')
   findOne(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
   ) {
     return this.floorService.findOne(site, building, floor);
   }
@@ -61,9 +62,9 @@ export class FloorController {
   @Put(':floor/diagram')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
     @UploadedFile(new DiagramUploadPipe()) file: Express.Multer.File,
   ) {
     const diagram = await this.mediaService.uploadImage(
@@ -78,9 +79,9 @@ export class FloorController {
 
   @Patch(':floor')
   update(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
     @Body() updateFloorDto: UpdateFloorDto,
   ) {
     return this.floorService.update(site, building, floor, updateFloorDto);
@@ -88,9 +89,9 @@ export class FloorController {
 
   @Delete(':floor')
   remove(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
   ) {
     return this.floorService.remove(site, building, floor);
   }

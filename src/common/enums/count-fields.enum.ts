@@ -4,5 +4,4 @@ export enum CountField {
   FLOOR_COUNT = 'floorCount',
   ROOM_COUNT = 'roomCount',
   DEVICE_COUNT = 'deviceCount',
-  POINTS_COUNT = 'pointsCount',
 }

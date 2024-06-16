@@ -62,7 +62,6 @@ export class SiteService {
           address: 1,
           buildingCount: 1,
           deviceCount: 1,
-          pointsCount: 1,
           cover: 1,
           createdAt: 1,
         },

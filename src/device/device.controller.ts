@@ -12,6 +12,7 @@ import { DeviceService } from './device.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { IsObjectIdPipe } from '../common/pipes/objectid.pipe';
 
 @Controller({
   path: 'sites/:site/buildings/:building/floors/:floor/rooms/:room/devices',
@@ -22,10 +23,10 @@ export class DeviceController {
 
   @Post()
   create(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
     @Body() createDeviceDto: CreateDeviceDto,
   ) {
     return this.deviceService.create(
@@ -39,10 +40,10 @@ export class DeviceController {
 
   @Get()
   findAll(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
     @Query('search') search: string,
     @Query() paginationDto: PaginationQueryDto,
   ) {
@@ -58,22 +59,22 @@ export class DeviceController {
 
   @Get(':device')
   findOne(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
-    @Param('device') device: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
+    @Param('device', IsObjectIdPipe) device: string,
   ) {
     return this.deviceService.findOne(site, building, floor, room, device);
   }
 
   @Patch(':device')
   update(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
-    @Param('device') device: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
+    @Param('device', IsObjectIdPipe) device: string,
     @Body() updateDeviceDto: UpdateDeviceDto,
   ) {
     return this.deviceService.update(
@@ -88,11 +89,11 @@ export class DeviceController {
 
   @Delete(':device')
   remove(
-    @Param('site') site: string,
-    @Param('building') building: string,
-    @Param('floor') floor: string,
-    @Param('room') room: string,
-    @Param('device') device: string,
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building', IsObjectIdPipe) building: string,
+    @Param('floor', IsObjectIdPipe) floor: string,
+    @Param('room', IsObjectIdPipe) room: string,
+    @Param('device', IsObjectIdPipe) device: string,
   ) {
     return this.deviceService.remove(site, building, floor, room, device);
   }

@@ -21,6 +21,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Account } from '../common/interfaces/account.interface';
 import { ImageUploadPipe } from '../common/pipes/image.pipe';
+import { IsObjectIdPipe } from '../common/pipes/objectid.pipe';
 import { Role } from '../common/enums/role.enum';
 import { Folder } from '../common/enums/folder.enum';
 
@@ -91,7 +92,7 @@ export class UserController {
   @Roles(Role.ADMIN)
   @Patch(':user/reset-password')
   resetPassword(
-    @Param('user') user: string,
+    @Param('user', IsObjectIdPipe) user: string,
     @Body() resetPasswordDto: ResetPasswordDto,
   ) {
     return this.userService.resetPassword(user, resetPasswordDto);

@@ -18,6 +18,7 @@ import { CreateBuildingDto } from './dto/create-building.dto';
 import { UpdateBuildingDto } from './dto/update-building.dto';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { ImageUploadPipe } from '../common/pipes/image.pipe';
+import { IsObjectIdPipe } from '../common/pipes/objectid.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
@@ -32,7 +33,7 @@ export class BuildingController {
 
   @Post()
   create(
-    @Param('site') site: string,
+    @Param('site', IsObjectIdPipe) site: string,
     @Body() createBuildingDto: CreateBuildingDto,
   ) {
     return this.buildingService.create(site, createBuildingDto);
@@ -40,7 +41,7 @@ export class BuildingController {
 
   @Get()
   findAll(
-    @Param('site') site: string,
+    @Param('site', IsObjectIdPipe) site: string,
     @Query('search') search?: string,
     @Query() paginationDto?: PaginationQueryDto,
   ) {
@@ -48,14 +49,17 @@ export class BuildingController {
   }
 
   @Get(':building')
-  findOne(@Param('site') site: string, @Param('building') building: string) {
+  findOne(
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building') building: string,
+  ) {
     return this.buildingService.findOne(site, building);
   }
 
   @Put(':building/cover')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
-    @Param('site') site: string,
+    @Param('site', IsObjectIdPipe) site: string,
     @Param('building') building: string,
     @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
   ) {
@@ -69,7 +73,7 @@ export class BuildingController {
 
   @Patch(':building')
   update(
-    @Param('site') site: string,
+    @Param('site', IsObjectIdPipe) site: string,
     @Param('building') building: string,
     @Body() updateBuildingDto: UpdateBuildingDto,
   ) {
@@ -77,7 +81,10 @@ export class BuildingController {
   }
 
   @Delete(':building')
-  remove(@Param('site') site: string, @Param('building') building: string) {
+  remove(
+    @Param('site', IsObjectIdPipe) site: string,
+    @Param('building') building: string,
+  ) {
     return this.buildingService.remove(site, building);
   }
 }

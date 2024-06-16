@@ -19,6 +19,7 @@ import { CreateSiteDto } from './dto/create-site.dto';
 import { UpdateSiteDto } from './dto/update-site.dto';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { ImageUploadPipe } from '../common/pipes/image.pipe';
+import { IsObjectIdPipe } from '../common/pipes/objectid.pipe';
 import { Folder } from '../common/enums/folder.enum';
 
 @Controller({
@@ -46,13 +47,13 @@ export class SiteController {
   }
 
   @Get(':site')
-  findOne(@Param('site') site: string) {
+  findOne(@Param('site', IsObjectIdPipe) site: string) {
     return this.siteService.findOne(site);
   }
 
   @Get(':site/devices')
   getSiteDevices(
-    @Param('site') site: string,
+    @Param('site', IsObjectIdPipe) site: string,
     @Query('search') search: string,
     @Query() paginationDto: PaginationQueryDto,
   ) {
@@ -62,7 +63,7 @@ export class SiteController {
   @Put(':site/cover')
   @UseInterceptors(FileInterceptor('file'))
   async updateProfilePic(
-    @Param('site') site: string,
+    @Param('site', IsObjectIdPipe) site: string,
     @UploadedFile(new ImageUploadPipe()) file: Express.Multer.File,
   ) {
     const cover = await this.mediaService.uploadImage(
@@ -74,12 +75,15 @@ export class SiteController {
   }
 
   @Patch(':site')
-  update(@Param('site') site: string, @Body() updateSiteDto: UpdateSiteDto) {
+  update(
+    @Param('site', IsObjectIdPipe) site: string,
+    @Body() updateSiteDto: UpdateSiteDto,
+  ) {
     return this.siteService.update(site, updateSiteDto);
   }
 
   @Delete(':site')
-  remove(@Param('site') site: string) {
+  remove(@Param('site', IsObjectIdPipe) site: string) {
     return this.siteService.remove(site);
   }
 }

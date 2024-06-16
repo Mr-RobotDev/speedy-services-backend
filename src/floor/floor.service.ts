@@ -88,7 +88,6 @@ export class FloorService {
           description: 1,
           roomCount: 1,
           deviceCount: 1,
-          pointsCount: 1,
           diagram: 1,
           building: 1,
           createdAt: 1,
