@@ -61,7 +61,7 @@ export class DeviceService {
     createDeviceDto: CreateDeviceDto,
   ) {
     const room = await this.findRoom(siteId, buildingId, floorId, roomId);
-    const device = await this.deviceModel.create({
+    const newDevice = await this.deviceModel.create({
       ...createDeviceDto,
       site: siteId,
       building: buildingId,
@@ -75,7 +75,7 @@ export class DeviceService {
     );
     await this.floorService.increaseStats(floorId, CountField.DEVICE_COUNT);
     await this.roomService.increaseStats(room._id, CountField.DEVICE_COUNT);
-    return device;
+    return this.findOne(siteId, buildingId, floorId, roomId, newDevice._id);
   }
 
   async findAll(
@@ -163,10 +163,15 @@ export class DeviceService {
     id: string,
   ) {
     const room = await this.findRoom(siteId, buildingId, floorId, roomId);
-    const device = await this.deviceModel.findOne({
-      _id: id,
-      room: room._id,
-    });
+    const device = await this.deviceModel
+      .findOne({
+        _id: id,
+        room: room._id,
+      })
+      .populate('site', 'name')
+      .populate('building', 'name')
+      .populate('floor', 'name')
+      .populate('room', 'name');
     if (!device) {
       throw new NotFoundException('Device not found');
     }
