@@ -127,7 +127,7 @@ export class DeviceService {
     const site = await this.siteService.findOne(siteId);
     return this.deviceModel.paginate(
       {
-        site: site._id,
+        site: site.id,
         ...(search && { name: { $regex: search, $options: 'i' } }),
       },
       {
