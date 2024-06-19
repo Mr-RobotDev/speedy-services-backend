@@ -34,10 +34,10 @@ export class Device extends Document {
   type: string;
 
   @Prop({
-    type: String,
-    required: true,
+    type: Number,
+    default: 0,
   })
-  value: string;
+  value: number;
 
   @Prop({
     type: Types.ObjectId,
