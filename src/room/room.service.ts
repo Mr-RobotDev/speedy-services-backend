@@ -87,8 +87,6 @@ export class RoomService {
           description: 1,
           deviceCount: 1,
           diagram: 1,
-          floor: 1,
-          createdAt: 1,
         },
       },
     ];
@@ -103,10 +101,13 @@ export class RoomService {
     id: string,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const room = await this.roomModel.findOne({
-      _id: id,
-      floor: floor._id,
-    });
+    const room = await this.roomModel.findOne(
+      {
+        _id: id,
+        floor: floor._id,
+      },
+      '-floor',
+    );
     if (!room) {
       throw new NotFoundException('Room not found');
     }
@@ -127,7 +128,7 @@ export class RoomService {
         floor: floor._id,
       },
       updateRoom,
-      { new: true },
+      { new: true, projection: '-floor' },
     );
     if (!room) {
       throw new NotFoundException('Room not found');
@@ -142,10 +143,13 @@ export class RoomService {
     id: string,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const room = await this.roomModel.findOneAndDelete({
-      _id: id,
-      floor: floor._id,
-    });
+    const room = await this.roomModel.findOneAndDelete(
+      {
+        _id: id,
+        floor: floor._id,
+      },
+      { projection: '-floor' },
+    );
     if (!room) {
       throw new NotFoundException('Room not found');
     }

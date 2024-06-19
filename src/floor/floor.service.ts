@@ -89,8 +89,6 @@ export class FloorService {
           roomCount: 1,
           deviceCount: 1,
           diagram: 1,
-          building: 1,
-          createdAt: 1,
         },
       },
     ];
@@ -100,10 +98,13 @@ export class FloorService {
 
   async findOne(siteId: string, buildingId: string, id: string) {
     const building = await this.findBuilding(siteId, buildingId);
-    const floor = await this.floorModel.findOne({
-      _id: id,
-      building: building._id,
-    });
+    const floor = await this.floorModel.findOne(
+      {
+        _id: id,
+        building: building._id,
+      },
+      '-building',
+    );
     if (!floor) {
       throw new NotFoundException('Floor not found');
     }
@@ -123,7 +124,7 @@ export class FloorService {
         building: building._id,
       },
       updateFloor,
-      { new: true },
+      { new: true, projection: '-building' },
     );
     if (!floor) {
       throw new NotFoundException('Floor not found');
@@ -133,10 +134,13 @@ export class FloorService {
 
   async remove(siteId: string, buildingId: string, id: string) {
     const building = await this.findBuilding(siteId, buildingId);
-    const floor = await this.floorModel.findOneAndDelete({
-      _id: id,
-      building: building._id,
-    });
+    const floor = await this.floorModel.findOneAndDelete(
+      {
+        _id: id,
+        building: building._id,
+      },
+      { projection: '-building' },
+    );
     if (!floor) {
       throw new NotFoundException('Floor not found');
     }

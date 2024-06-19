@@ -63,7 +63,6 @@ export class SiteService {
           buildingCount: 1,
           deviceCount: 1,
           cover: 1,
-          createdAt: 1,
         },
       },
     ];

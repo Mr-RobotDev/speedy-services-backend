@@ -82,8 +82,6 @@ export class BuildingService {
           floorCount: 1,
           deviceCount: 1,
           cover: 1,
-          site: 1,
-          createdAt: 1,
         },
       },
     ];
@@ -93,10 +91,13 @@ export class BuildingService {
 
   async findOne(siteId: string, id: string) {
     const site = await this.findSite(siteId);
-    const building = await this.buildingModel.findOne({
-      _id: id,
-      site: site._id,
-    });
+    const building = await this.buildingModel.findOne(
+      {
+        _id: id,
+        site: site._id,
+      },
+      '-site',
+    );
     if (!building) {
       throw new NotFoundException('Building not found');
     }
@@ -115,7 +116,7 @@ export class BuildingService {
         site: site._id,
       },
       updateBuilding,
-      { new: true },
+      { new: true, projection: '-site' },
     );
     if (!building) {
       throw new NotFoundException('Building not found');
@@ -125,10 +126,13 @@ export class BuildingService {
 
   async remove(siteId: string, id: string) {
     const site = await this.findSite(siteId);
-    const building = await this.buildingModel.findOneAndDelete({
-      _id: id,
-      site: site._id,
-    });
+    const building = await this.buildingModel.findOneAndDelete(
+      {
+        _id: id,
+        site: site._id,
+      },
+      { projection: '-site' },
+    );
     if (!building) {
       throw new NotFoundException('Building not found');
     }
