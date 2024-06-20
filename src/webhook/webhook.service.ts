@@ -1,7 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { DeviceService } from '../device/device.service';
 import { EventService } from '../event/event.service';
 
@@ -21,11 +20,8 @@ export class WebhookService implements OnModuleInit {
     );
   }
 
-  async onModuleInit() {
-    await this.refreshResolvedUrl();
-  }
+  async onModuleInit() {}
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
   async refreshResolvedUrl() {
     try {
       const response = await this.httpService.axiosRef.get(
@@ -37,7 +33,6 @@ export class WebhookService implements OnModuleInit {
     }
   }
 
-  @Cron('*/15 * * * * *')
   async fetchData() {
     try {
       const uuids = await this.deviceService.getAllDevices();
