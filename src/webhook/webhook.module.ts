@@ -12,6 +12,7 @@ import { EventModule } from '../event/event.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         baseURL: configService.get<string>('miniserver.url'),
+        timeout: 10000,
       }),
       inject: [ConfigService],
     }),
