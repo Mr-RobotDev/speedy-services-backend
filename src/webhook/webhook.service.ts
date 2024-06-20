@@ -25,7 +25,7 @@ export class WebhookService implements OnModuleInit {
     await this.refreshResolvedUrl();
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async refreshResolvedUrl() {
     try {
       const response = await this.httpService.axiosRef.get(

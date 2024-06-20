@@ -13,7 +13,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { MediaService } from '../media/media.service';
-import { SignUpDto } from '../auth/dto/signup.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -37,8 +37,8 @@ export class UserController {
 
   @Roles(Role.ADMIN)
   @Post()
-  createUser(@Body() signUpDto: SignUpDto) {
-    return this.userService.createUser(signUpDto);
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto);
   }
 
   @Get('me')
@@ -50,12 +50,6 @@ export class UserController {
   @Get()
   getUsers(@Query('limit') limit?: number, @Query('page') page?: number) {
     return this.userService.getUsers(page, limit);
-  }
-
-  @Roles(Role.ADMIN)
-  @Get('stats')
-  getUserStats() {
-    return this.userService.getUserStats();
   }
 
   @Put('profile')

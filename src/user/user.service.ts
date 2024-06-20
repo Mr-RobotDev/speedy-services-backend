@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PipelineStage, UpdateQuery } from 'mongoose';
+import { UpdateQuery } from 'mongoose';
 import { compare } from 'bcrypt';
 import { User } from './schema/user.schema';
 import { SignUpDto } from '../auth/dto/signup.dto';
@@ -13,6 +13,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { PaginatedModel } from '../common/interfaces/paginated-model.interface';
 import { Role } from '../common/enums/role.enum';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -25,13 +26,15 @@ export class UserService {
     return this.userModel.create(signUpDto);
   }
 
-  async createUser(signUpDto: SignUpDto): Promise<{ user: Partial<User> }> {
-    const user = await this.getUserByEmail(signUpDto.email);
+  async createUser(
+    createUserDto: CreateUserDto,
+  ): Promise<{ user: Partial<User> }> {
+    const user = await this.getUserByEmail(createUserDto.email);
     if (user) {
       throw new ConflictException('Email already exists');
     }
     const newUser = await this.userModel.create({
-      ...signUpDto,
+      ...createUserDto,
       isActive: true,
       activatedAt: new Date(),
     });
@@ -138,96 +141,5 @@ export class UserService {
         projection: '-password -activatedAt',
       },
     );
-  }
-
-  async getUserStats() {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthEnd = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      0,
-      23,
-      59,
-      59,
-    );
-
-    const pipeline: PipelineStage[] = [
-      {
-        $facet: {
-          totalUsers: [{ $count: 'count' }],
-          totalUsersThisMonth: [
-            { $match: { createdAt: { $gte: startOfMonth } } },
-            { $count: 'count' },
-          ],
-          totalUsersThisYear: [
-            { $match: { createdAt: { $gte: startOfYear } } },
-            { $count: 'count' },
-          ],
-          lastMonthCount: [
-            {
-              $match: {
-                createdAt: { $gte: lastMonthStart, $lt: lastMonthEnd },
-              },
-            },
-            { $count: 'count' },
-          ],
-        },
-      },
-      {
-        $project: {
-          totalUsers: {
-            $ifNull: [{ $arrayElemAt: ['$totalUsers.count', 0] }, 0],
-          },
-          totalUsersLastMonth: {
-            $ifNull: [{ $arrayElemAt: ['$lastMonthCount.count', 0] }, 0],
-          },
-          totalUsersThisMonth: {
-            $ifNull: [{ $arrayElemAt: ['$totalUsersThisMonth.count', 0] }, 0],
-          },
-          totalUsersThisYear: {
-            $ifNull: [{ $arrayElemAt: ['$totalUsersThisYear.count', 0] }, 0],
-          },
-          percentageChange: {
-            $cond: {
-              if: { $eq: [{ $arrayElemAt: ['$lastMonthCount.count', 0] }, 0] },
-              then: {
-                $cond: {
-                  if: {
-                    $gt: [
-                      { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
-                      0,
-                    ],
-                  },
-                  then: 100,
-                  else: 0,
-                },
-              },
-              else: {
-                $multiply: [
-                  {
-                    $divide: [
-                      {
-                        $subtract: [
-                          { $arrayElemAt: ['$totalUsersThisMonth.count', 0] },
-                          { $arrayElemAt: ['$lastMonthCount.count', 0] },
-                        ],
-                      },
-                      { $arrayElemAt: ['$lastMonthCount.count', 0] },
-                    ],
-                  },
-                  100,
-                ],
-              },
-            },
-          },
-        },
-      },
-    ];
-
-    const [stats] = await this.userModel.aggregate(pipeline);
-    return stats;
   }
 }
