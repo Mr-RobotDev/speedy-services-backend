@@ -1,6 +1,8 @@
 import { Controller, Post, Req, RawBodyRequest } from '@nestjs/common';
 import { Request } from 'express';
+import { Public } from '../common/decorators/public.decorator';
 
+@Public()
 @Controller({
   path: 'webhook',
   version: '1',
