@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -90,5 +91,11 @@ export class UserController {
     @Body() resetPasswordDto: ResetPasswordDto,
   ) {
     return this.userService.resetPassword(user, resetPasswordDto);
+  }
+
+  @Roles(Role.ADMIN)
+  @Delete(':user')
+  removeUser(@Param('user', IsObjectIdPipe) user: string) {
+    return this.userService.removeUser(user);
   }
 }
