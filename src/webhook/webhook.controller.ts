@@ -10,7 +10,7 @@ import { Public } from '../common/decorators/public.decorator';
 export class WebhookController {
   @Post('receive-events-raw')
   async receiveEventsRaw(@Req() req: RawBodyRequest<Request>) {
-    console.log(req.rawBody.toString('utf8'));
+    if (req.rawBody) console.log(req.rawBody.toString('utf8'));
   }
 
   @Post('receive-events-json')
