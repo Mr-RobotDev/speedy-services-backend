@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PipelineStage, UpdateQuery } from 'mongoose';
+import { UpdateQuery } from 'mongoose';
 import { Room } from './schema/room.schema';
 import { FloorService } from '../floor/floor.service';
 import { MediaService } from '../media/media.service';
@@ -38,12 +38,12 @@ export class RoomService {
     createRoomDto: CreateRoomDto,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const room = await this.roomModel.create({
+    const newRoom = await this.roomModel.create({
       ...createRoomDto,
       floor: floor._id,
     });
     await this.floorService.increaseStats(floor._id, CountField.ROOM_COUNT);
-    return room;
+    return this.findOne(siteId, buildingId, floorId, newRoom.id);
   }
 
   async findAll(
@@ -54,44 +54,33 @@ export class RoomService {
     paginationDto?: PaginationQueryDto,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const pipeline: PipelineStage[] = [
-      ...(search
-        ? [
-            {
-              $search: {
-                index: 'rooms_partial_search',
-                autocomplete: {
-                  path: 'name',
-                  query: search,
-                  tokenOrder: 'sequential',
-                  fuzzy: {
-                    maxEdits: 1,
-                    prefixLength: 3,
-                    maxExpansions: 100,
-                  },
-                },
+    const { page, limit } = paginationDto;
+    return this.roomModel.paginate(
+      {
+        floor: floor._id,
+        ...(search && {
+          name: { $regex: search, $options: 'i' },
+        }),
+      },
+      {
+        page,
+        limit,
+        populate: [
+          {
+            path: 'floor',
+            select: 'name',
+            populate: {
+              path: 'building',
+              select: 'name',
+              populate: {
+                path: 'site',
+                select: 'name',
               },
             },
-          ]
-        : []),
-      {
-        $match: {
-          floor: floor._id,
-        },
+          },
+        ],
       },
-      {
-        $project: {
-          _id: 0,
-          id: '$_id',
-          name: 1,
-          description: 1,
-          deviceCount: 1,
-          diagram: 1,
-        },
-      },
-    ];
-
-    return this.roomModel.paginatedAggregation(pipeline, paginationDto);
+    );
   }
 
   async findOne(
@@ -101,13 +90,23 @@ export class RoomService {
     id: string,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const room = await this.roomModel.findOne(
-      {
+    const room = await this.roomModel
+      .findOne({
         _id: id,
         floor: floor._id,
-      },
-      '-floor',
-    );
+      })
+      .populate({
+        path: 'floor',
+        select: 'name',
+        populate: {
+          path: 'building',
+          select: 'name',
+          populate: {
+            path: 'site',
+            select: 'name',
+          },
+        },
+      });
     if (!room) {
       throw new NotFoundException('Room not found');
     }
@@ -122,14 +121,30 @@ export class RoomService {
     updateRoom: UpdateQuery<Room>,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const room = await this.roomModel.findOneAndUpdate(
-      {
-        _id: id,
-        floor: floor._id,
-      },
-      updateRoom,
-      { new: true, projection: '-floor' },
-    );
+    const room = await this.roomModel
+      .findOneAndUpdate(
+        {
+          _id: id,
+          floor: floor._id,
+        },
+        updateRoom,
+        {
+          new: true,
+        },
+      )
+      .populate({
+        path: 'floor',
+        select: 'name',
+        populate: {
+          path: 'building',
+          select: 'name',
+          populate: {
+            path: 'site',
+            select: 'name',
+          },
+        },
+      });
+
     if (!room) {
       throw new NotFoundException('Room not found');
     }
@@ -143,13 +158,10 @@ export class RoomService {
     id: string,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const room = await this.roomModel.findOneAndDelete(
-      {
-        _id: id,
-        floor: floor._id,
-      },
-      { projection: '-floor' },
-    );
+    const room = await this.roomModel.findOneAndDelete({
+      _id: id,
+      floor: floor._id,
+    });
     if (!room) {
       throw new NotFoundException('Room not found');
     }

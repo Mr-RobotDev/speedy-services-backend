@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PipelineStage, UpdateQuery } from 'mongoose';
+import { UpdateQuery } from 'mongoose';
 import { Site } from './schema/site.schema';
 import { MediaService } from '../media/media.service';
 import { BuildingService } from '../building/building.service';
@@ -25,49 +25,22 @@ export class SiteService {
   ) {}
 
   async create(createSiteDto: CreateSiteDto) {
-    const site = await this.siteModel.create({
-      ...createSiteDto,
-    });
-    return site;
+    return this.siteModel.create(createSiteDto);
   }
 
   async findAll(search: string, paginationDto: PaginationQueryDto) {
-    const pipeline: PipelineStage[] = [
-      ...(search
-        ? [
-            {
-              $search: {
-                index: 'sites_partial_search',
-                autocomplete: {
-                  path: 'name',
-                  query: search,
-                  tokenOrder: 'sequential',
-                  fuzzy: {
-                    maxEdits: 1,
-                    prefixLength: 3,
-                    maxExpansions: 100,
-                  },
-                },
-              },
-            },
-          ]
-        : []),
+    const { page, limit } = paginationDto;
+    return this.siteModel.paginate(
       {
-        $project: {
-          _id: 0,
-          id: '$_id',
-          name: 1,
-          description: 1,
-          location: 1,
-          address: 1,
-          buildingCount: 1,
-          deviceCount: 1,
-          cover: 1,
-        },
+        ...(search && {
+          name: { $regex: search, $options: 'i' },
+        }),
       },
-    ];
-
-    return this.siteModel.paginatedAggregation(pipeline, paginationDto);
+      {
+        page,
+        limit,
+      },
+    );
   }
 
   async findOne(id: string) {

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PipelineStage, UpdateQuery } from 'mongoose';
+import { UpdateQuery } from 'mongoose';
 import { Building } from './schema/building.schema';
 import { MediaService } from '../media/media.service';
 import { SiteService } from '../site/site.service';
@@ -33,12 +33,12 @@ export class BuildingService {
 
   async create(siteId: string, createBuildingDto: CreateBuildingDto) {
     const site = await this.findSite(siteId);
-    const building = await this.buildingModel.create({
+    const newBuilding = await this.buildingModel.create({
       ...createBuildingDto,
       site: site._id,
     });
     await this.siteService.increaseStats(site._id, CountField.BUILDING_COUNT);
-    return building;
+    return this.findOne(siteId, newBuilding.id);
   }
 
   async findAll(
@@ -47,57 +47,35 @@ export class BuildingService {
     paginationDto?: PaginationQueryDto,
   ) {
     const site = await this.findSite(siteId);
-    const pipeline: PipelineStage[] = [
-      ...(search
-        ? [
-            {
-              $search: {
-                index: 'buildings_partial_search',
-                autocomplete: {
-                  path: 'name',
-                  query: search,
-                  tokenOrder: 'sequential',
-                  fuzzy: {
-                    maxEdits: 1,
-                    prefixLength: 3,
-                    maxExpansions: 100,
-                  },
-                },
-              },
-            },
-          ]
-        : []),
+    const { page, limit } = paginationDto;
+    return this.buildingModel.paginate(
       {
-        $match: {
-          site: site._id,
-        },
+        site: site._id,
+        ...(search && {
+          name: { $regex: search, $options: 'i' },
+        }),
       },
       {
-        $project: {
-          _id: 0,
-          id: '$_id',
-          name: 1,
-          description: 1,
-          address: 1,
-          floorCount: 1,
-          deviceCount: 1,
-          cover: 1,
-        },
+        page,
+        limit,
+        populate: [
+          {
+            path: 'site',
+            select: 'name',
+          },
+        ],
       },
-    ];
-
-    return this.buildingModel.paginatedAggregation(pipeline, paginationDto);
+    );
   }
 
   async findOne(siteId: string, id: string) {
     const site = await this.findSite(siteId);
-    const building = await this.buildingModel.findOne(
-      {
+    const building = await this.buildingModel
+      .findOne({
         _id: id,
         site: site._id,
-      },
-      '-site',
-    );
+      })
+      .populate({ path: 'site', select: 'name' });
     if (!building) {
       throw new NotFoundException('Building not found');
     }
@@ -116,7 +94,13 @@ export class BuildingService {
         site: site._id,
       },
       updateBuilding,
-      { new: true, projection: '-site' },
+      {
+        new: true,
+        populate: {
+          path: 'site',
+          select: 'name',
+        },
+      },
     );
     if (!building) {
       throw new NotFoundException('Building not found');
@@ -126,13 +110,10 @@ export class BuildingService {
 
   async remove(siteId: string, id: string) {
     const site = await this.findSite(siteId);
-    const building = await this.buildingModel.findOneAndDelete(
-      {
-        _id: id,
-        site: site._id,
-      },
-      { projection: '-site' },
-    );
+    const building = await this.buildingModel.findOneAndDelete({
+      _id: id,
+      site: site._id,
+    });
     if (!building) {
       throw new NotFoundException('Building not found');
     }

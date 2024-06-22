@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { PipelineStage, UpdateQuery } from 'mongoose';
+import { UpdateQuery } from 'mongoose';
 import { Floor } from './schema/floor.schema';
 import { MediaService } from '../media/media.service';
 import { BuildingService } from '../building/building.service';
@@ -37,7 +37,7 @@ export class FloorService {
     createFloorDto: CreateFloorDto,
   ) {
     const building = await this.findBuilding(siteId, buildingId);
-    const floor = await this.floorModel.create({
+    const newFloor = await this.floorModel.create({
       ...createFloorDto,
       building: building._id,
     });
@@ -45,7 +45,7 @@ export class FloorService {
       building._id,
       CountField.FLOOR_COUNT,
     );
-    return floor;
+    return this.findOne(siteId, buildingId, newFloor.id);
   }
 
   async findAll(
@@ -55,56 +55,46 @@ export class FloorService {
     paginationDto?: PaginationQueryDto,
   ) {
     const building = await this.findBuilding(siteId, buildingId);
-    const pipeline: PipelineStage[] = [
-      ...(search
-        ? [
-            {
-              $search: {
-                index: 'floors_partial_search',
-                autocomplete: {
-                  path: 'name',
-                  query: search,
-                  tokenOrder: 'sequential',
-                  fuzzy: {
-                    maxEdits: 1,
-                    prefixLength: 3,
-                    maxExpansions: 100,
-                  },
-                },
-              },
+    const { page, limit } = paginationDto;
+    return this.floorModel.paginate(
+      {
+        building: building._id,
+        ...(search && {
+          name: { $regex: search, $options: 'i' },
+        }),
+      },
+      {
+        page,
+        limit,
+        populate: [
+          {
+            path: 'building',
+            select: 'name',
+            populate: {
+              path: 'site',
+              select: 'name',
             },
-          ]
-        : []),
-      {
-        $match: {
-          building: building._id,
-        },
+          },
+        ],
       },
-      {
-        $project: {
-          _id: 0,
-          id: '$_id',
-          name: 1,
-          description: 1,
-          roomCount: 1,
-          deviceCount: 1,
-          diagram: 1,
-        },
-      },
-    ];
-
-    return this.floorModel.paginatedAggregation(pipeline, paginationDto);
+    );
   }
 
   async findOne(siteId: string, buildingId: string, id: string) {
     const building = await this.findBuilding(siteId, buildingId);
-    const floor = await this.floorModel.findOne(
-      {
+    const floor = await this.floorModel
+      .findOne({
         _id: id,
         building: building._id,
-      },
-      '-building',
-    );
+      })
+      .populate({
+        path: 'building',
+        select: 'name',
+        populate: {
+          path: 'site',
+          select: 'name',
+        },
+      });
     if (!floor) {
       throw new NotFoundException('Floor not found');
     }
@@ -124,7 +114,17 @@ export class FloorService {
         building: building._id,
       },
       updateFloor,
-      { new: true, projection: '-building' },
+      {
+        new: true,
+        populate: {
+          path: 'building',
+          select: 'name',
+          populate: {
+            path: 'site',
+            select: 'name',
+          },
+        },
+      },
     );
     if (!floor) {
       throw new NotFoundException('Floor not found');
@@ -134,13 +134,10 @@ export class FloorService {
 
   async remove(siteId: string, buildingId: string, id: string) {
     const building = await this.findBuilding(siteId, buildingId);
-    const floor = await this.floorModel.findOneAndDelete(
-      {
-        _id: id,
-        building: building._id,
-      },
-      { projection: '-building' },
-    );
+    const floor = await this.floorModel.findOneAndDelete({
+      _id: id,
+      building: building._id,
+    });
     if (!floor) {
       throw new NotFoundException('Floor not found');
     }
