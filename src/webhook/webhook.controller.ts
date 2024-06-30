@@ -20,10 +20,6 @@ export class WebhookController {
   @Post('receive-events-raw')
   @HttpCode(HttpStatus.OK)
   async receiveEventsRaw(@Req() req: RawBodyRequest<Request>) {
-    if (req.rawBody) {
-      console.log(req.rawBody.toString('utf8'));
-    } else {
-      console.error('No rawBody found');
-    }
+    if (req.rawBody) console.log(req.rawBody.toString('utf8'));
   }
 }
