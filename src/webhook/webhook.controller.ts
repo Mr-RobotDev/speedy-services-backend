@@ -17,9 +17,9 @@ import { Public } from '../common/decorators/public.decorator';
 export class WebhookController {
   constructor() {}
 
-  @Post('receive-events-plain')
+  @Post('receive-events-raw')
   @HttpCode(HttpStatus.OK)
-  async receiveEventsPlain(@Req() req: RawBodyRequest<Request>) {
+  async receiveEventsRaw(@Req() req: RawBodyRequest<Request>) {
     if (req.rawBody) {
       console.log(req.rawBody.toString('utf8'));
     } else {
