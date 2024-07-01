@@ -29,7 +29,7 @@ export class AuthService {
     const newUser = await this.userService.create(signUpDto);
     return {
       user: {
-        id: newUser._id,
+        id: newUser.id,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
@@ -49,7 +49,7 @@ export class AuthService {
       throw new BadRequestException('This account is already active!');
     }
 
-    await this.userService.updateUserById(user._id, {
+    await this.userService.updateUserById(user.id, {
       isActive: true,
       activatedAt: new Date(),
     });
@@ -76,14 +76,14 @@ export class AuthService {
       throw new BadRequestException('Invalid password');
     }
     const payload = {
-      sub: user._id,
+      sub: user.id,
       email: user.email,
       role: user.role,
     };
     const token = await this.jwtService.signAsync(payload);
     return {
       user: {
-        id: user._id,
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,

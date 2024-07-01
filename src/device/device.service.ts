@@ -31,19 +31,6 @@ export class DeviceService {
     private readonly roomService: RoomService,
   ) {}
 
-  async getAllDevices() {
-    const devices = await this.deviceModel.find({}, 'uuid');
-    return devices.map((device) => device.uuid);
-  }
-
-  async updateDeviceValue(uuid: string, value: string): Promise<Device> {
-    return this.deviceModel.findOneAndUpdate(
-      { uuid },
-      { value },
-      { new: true },
-    );
-  }
-
   private async findRoom(
     siteId: string,
     buildingId: string,
@@ -61,12 +48,12 @@ export class DeviceService {
     createDeviceDto: CreateDeviceDto,
   ) {
     const room = await this.findRoom(siteId, buildingId, floorId, roomId);
-    const newDevice = await this.deviceModel.create({
+    const device = await this.deviceModel.create({
       ...createDeviceDto,
       site: siteId,
       building: buildingId,
       floor: floorId,
-      room: room._id,
+      room: room.id,
     });
     await this.siteService.increaseStats(siteId, CountField.DEVICE_COUNT);
     await this.buildingService.increaseStats(
@@ -74,8 +61,8 @@ export class DeviceService {
       CountField.DEVICE_COUNT,
     );
     await this.floorService.increaseStats(floorId, CountField.DEVICE_COUNT);
-    await this.roomService.increaseStats(room._id, CountField.DEVICE_COUNT);
-    return this.findOne(siteId, buildingId, floorId, roomId, newDevice._id);
+    await this.roomService.increaseStats(room.id, CountField.DEVICE_COUNT);
+    return this.findOne(siteId, buildingId, floorId, roomId, device.id);
   }
 
   async findAll(
@@ -90,7 +77,7 @@ export class DeviceService {
     const room = await this.findRoom(siteId, buildingId, floorId, roomId);
     return this.deviceModel.paginate(
       {
-        room: room._id,
+        room: room.id,
         ...(search && { name: { $regex: search, $options: 'i' } }),
       },
       {
@@ -166,7 +153,7 @@ export class DeviceService {
     const device = await this.deviceModel
       .findOne({
         _id: id,
-        room: room._id,
+        room: room.id,
       })
       .populate('site', 'name')
       .populate('building', 'name')
@@ -190,7 +177,7 @@ export class DeviceService {
     const device = await this.deviceModel.findOneAndUpdate(
       {
         _id: id,
-        room: room._id,
+        room: room.id,
       },
       updateDevice,
       { new: true },
@@ -211,7 +198,7 @@ export class DeviceService {
     const room = await this.findRoom(siteId, buildingId, floorId, roomId);
     const device = await this.deviceModel.findOneAndDelete({
       _id: id,
-      room: room._id,
+      room: room.id,
     });
     if (!device) {
       throw new NotFoundException('Device not found');
@@ -222,7 +209,7 @@ export class DeviceService {
       CountField.DEVICE_COUNT,
     );
     await this.floorService.decreaseStats(floorId, CountField.DEVICE_COUNT);
-    await this.roomService.decreaseStats(room._id, CountField.DEVICE_COUNT);
+    await this.roomService.decreaseStats(room.id, CountField.DEVICE_COUNT);
     return device;
   }
 

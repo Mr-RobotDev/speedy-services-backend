@@ -38,12 +38,12 @@ export class RoomService {
     createRoomDto: CreateRoomDto,
   ) {
     const floor = await this.findFloor(siteId, buildingId, floorId);
-    const newRoom = await this.roomModel.create({
+    const room = await this.roomModel.create({
       ...createRoomDto,
-      floor: floor._id,
+      floor: floor.id,
     });
-    await this.floorService.increaseStats(floor._id, CountField.ROOM_COUNT);
-    return this.findOne(siteId, buildingId, floorId, newRoom.id);
+    await this.floorService.increaseStats(floor.id, CountField.ROOM_COUNT);
+    return this.findOne(siteId, buildingId, floorId, room.id);
   }
 
   async findAll(
@@ -57,7 +57,7 @@ export class RoomService {
     const { page, limit } = paginationDto;
     return this.roomModel.paginate(
       {
-        floor: floor._id,
+        floor: floor.id,
         ...(search && {
           name: { $regex: search, $options: 'i' },
         }),
@@ -93,7 +93,7 @@ export class RoomService {
     const room = await this.roomModel
       .findOne({
         _id: id,
-        floor: floor._id,
+        floor: floor.id,
       })
       .populate({
         path: 'floor',
@@ -125,7 +125,7 @@ export class RoomService {
       .findOneAndUpdate(
         {
           _id: id,
-          floor: floor._id,
+          floor: floor.id,
         },
         updateRoom,
         {
@@ -160,14 +160,14 @@ export class RoomService {
     const floor = await this.findFloor(siteId, buildingId, floorId);
     const room = await this.roomModel.findOneAndDelete({
       _id: id,
-      floor: floor._id,
+      floor: floor.id,
     });
     if (!room) {
       throw new NotFoundException('Room not found');
     }
-    await this.floorService.decreaseStats(floor._id, CountField.ROOM_COUNT);
+    await this.floorService.decreaseStats(floor.id, CountField.ROOM_COUNT);
     await this.mediaService.deleteImage(room.diagram);
-    await this.deviceService.removeRoomDevices(room._id);
+    await this.deviceService.removeRoomDevices(room.id);
     return room;
   }
 
@@ -179,7 +179,7 @@ export class RoomService {
       floor: floorId,
     });
     await Promise.all(
-      rooms.map((room) => this.deviceService.removeRoomDevices(room._id)),
+      rooms.map((room) => this.deviceService.removeRoomDevices(room.id)),
     );
     await Promise.all(
       rooms

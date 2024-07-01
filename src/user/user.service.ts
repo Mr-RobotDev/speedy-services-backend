@@ -41,7 +41,7 @@ export class UserService {
 
     return {
       user: {
-        id: newUser._id,
+        id: newUser.id,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
@@ -61,7 +61,7 @@ export class UserService {
     }
     return {
       user: {
-        id: user._id,
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
@@ -88,7 +88,7 @@ export class UserService {
 
     return {
       user: {
-        id: user._id,
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,

@@ -39,10 +39,10 @@ export class FloorService {
     const building = await this.findBuilding(siteId, buildingId);
     const newFloor = await this.floorModel.create({
       ...createFloorDto,
-      building: building._id,
+      building: building.id,
     });
     await this.buildingService.increaseStats(
-      building._id,
+      building.id,
       CountField.FLOOR_COUNT,
     );
     return this.findOne(siteId, buildingId, newFloor.id);
@@ -58,7 +58,7 @@ export class FloorService {
     const { page, limit } = paginationDto;
     return this.floorModel.paginate(
       {
-        building: building._id,
+        building: building.id,
         ...(search && {
           name: { $regex: search, $options: 'i' },
         }),
@@ -85,7 +85,7 @@ export class FloorService {
     const floor = await this.floorModel
       .findOne({
         _id: id,
-        building: building._id,
+        building: building.id,
       })
       .populate({
         path: 'building',
@@ -111,7 +111,7 @@ export class FloorService {
     const floor = await this.floorModel.findOneAndUpdate(
       {
         _id: id,
-        building: building._id,
+        building: building.id,
       },
       updateFloor,
       {
@@ -136,17 +136,17 @@ export class FloorService {
     const building = await this.findBuilding(siteId, buildingId);
     const floor = await this.floorModel.findOneAndDelete({
       _id: id,
-      building: building._id,
+      building: building.id,
     });
     if (!floor) {
       throw new NotFoundException('Floor not found');
     }
     await this.buildingService.decreaseStats(
-      building._id,
+      building.id,
       CountField.FLOOR_COUNT,
     );
     await this.mediaService.deleteImage(floor.diagram);
-    await this.roomService.removeFloorRooms(floor._id);
+    await this.roomService.removeFloorRooms(floor.id);
     return floor;
   }
 
@@ -158,7 +158,7 @@ export class FloorService {
       building: buildingId,
     });
     await Promise.all(
-      floors.map((floor) => this.roomService.removeFloorRooms(floor._id)),
+      floors.map((floor) => this.roomService.removeFloorRooms(floor.id)),
     );
     await Promise.all(
       floors

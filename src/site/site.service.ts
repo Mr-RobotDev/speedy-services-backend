@@ -68,7 +68,7 @@ export class SiteService {
     if (!site) {
       throw new NotFoundException('Site not found');
     }
-    await this.buildingService.removeSiteBuildings(site._id);
+    await this.buildingService.removeSiteBuildings(site.id);
     if (site.cover) await this.mediaService.deleteImage(site.cover);
     return site;
   }

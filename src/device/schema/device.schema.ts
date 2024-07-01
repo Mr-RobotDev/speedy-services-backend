@@ -23,13 +23,6 @@ export class Device extends Document {
   @Prop({
     type: String,
     required: true,
-    index: true,
-  })
-  uuid: string;
-
-  @Prop({
-    type: String,
-    required: true,
   })
   type: string;
 
