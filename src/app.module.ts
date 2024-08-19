@@ -1,7 +1,6 @@
 import { APP_GUARD } from '@nestjs/core';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from '../config/configuration';
 import { AppController } from './app.controller';
@@ -34,7 +33,6 @@ import { EventModule } from './event/event.module';
       isGlobal: true,
       ignoreEnvFile: false,
     }),
-    ScheduleModule.forRoot(),
     MediaModule,
     UserModule,
     AuthModule,
